@@ -4,6 +4,12 @@ import { Example } from './Example';
 import { Fun as Fun00 } from './00/Fun';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
+import { inspect } from '@xstate/inspect';
+
+inspect({
+  url: 'https://statecharts.io/inspect',
+  iframe: () => document.querySelector('iframe[data-xstate]'),
+});
 
 function getMarkdownLink(exercise) {
   return require(`./${exercise}/README.md`).default;
