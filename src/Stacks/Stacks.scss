@@ -1,0 +1,132 @@
+.HStack,
+.HStack *,
+.VStack,
+.VStack *,
+.ZStack,
+.ZStack * {
+  box-sizing: border-box;
+}
+
+.HStack,
+.VStack,
+.ZStack {
+  padding: var(--padding, 0);
+  height: 100%;
+  place-content: center;
+  place-items: var(--alignment, var(--alignment-center));
+  gap: var(--spacing, 0);
+
+  &_resizable {
+    width: 100vw;
+    max-width: 100%;
+    min-height: 0;
+  }
+
+  &_horizontally-resizable {
+    width: 100vw;
+    max-width: 100%;
+    min-height: 0;
+  }
+
+  &_vertically-resizable {
+    height: 100vh;
+    max-height: 100%;
+  }
+}
+
+.HStack,
+.VStack {
+  --alignment-top: flex-start;
+  --alignment-leading: flex-start;
+  --alignment-center: center;
+  --alignment-trailing: flex-end;
+  --alignment-bottom: flex-end;
+  display: flex;
+}
+
+.VStack {
+  flex-direction: column;
+}
+
+.ZStack {
+  --alignment-top-leading: start;
+  --alignment-top: start center;
+  --alignment-top-trailing: start end;
+  --alignment-leading: center start;
+  --alignment-center: center;
+  --alignment-trailing: center end;
+  --alignment-bottom-leading: end start;
+  --alignment-bottom: end center;
+  --alignment-bottom-trailing: end;
+  display: grid;
+  grid-auto-rows: 100%;
+  grid-auto-columns: 100%;
+}
+
+.ZStack__item {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.HStack__item,
+.VStack__item,
+.ZStack__item {
+  width: 100%;
+  min-width: var(--width, min-content);
+  max-width: var(--width, max-content);
+
+  &_resizable {
+    width: 100%;
+    min-width: 8px;
+    max-width: none;
+    height: 100%;
+    min-height: 8px;
+    max-height: none;
+  }
+
+  &_horizontally-resizable {
+    width: 100%;
+    min-width: 8px;
+    max-width: none;
+    height: var(--height, auto);
+    max-height: var(--height, max-content);
+  }
+
+  &_vertically-resizable {
+    height: 100%;
+    min-height: 8px;
+    max-height: none;
+    width: var(--width, auto);
+    max-width: var(--width, max-content);
+  }
+}
+
+.HStack__item-content,
+.VStack__item-content,
+.ZStack__item-content {
+  &_resizable {
+    width: 100%;
+    min-width: 8px;
+    max-width: none;
+    height: 100%;
+    min-height: 8px;
+    max-height: none;
+  }
+
+  &_horizontally-resizable {
+    width: 100%;
+    min-width: 8px;
+    max-width: none;
+    height: var(--height, auto);
+  }
+
+  &_vertically-resizable {
+    height: 100%;
+    min-height: 8px;
+    max-height: none;
+    width: var(--width, max-content);
+  }
+}
+
+.Spacer {
+  flex: 0 10000 auto;
+}
