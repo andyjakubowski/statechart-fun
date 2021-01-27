@@ -1,0 +1,34 @@
+.WatchContainer {
+  width: 100vw;
+  height: 100vh;
+  background-color: burlywood;
+}
+
+.Watch {
+  &__state-label {
+    padding: 4px;
+    background-color: hsla(0, 0%, 0%, 0.16);
+  }
+
+  &__face {
+    background-color: white;
+    border: 4px solid black;
+  }
+
+  &__name {
+    padding: 8px 0;
+    font-size: 17px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+}
+
+.WatchButton {
+  width: 32px;
+  height: 32px;
+  background-color: black;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  border: none;
+}

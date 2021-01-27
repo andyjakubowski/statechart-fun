@@ -1,14 +1,15 @@
 import './App.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Example } from './Example';
-import { Fun as Fun00 } from './00/Fun';
+import { Watch } from './00/Watch';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
 
 inspect({
   url: 'https://statecharts.io/inspect',
-  iframe: () => document.querySelector('iframe[data-xstate]'),
+  // iframe: () => document.querySelector('iframe[data-xstate]'),
+  iframe: false,
 });
 
 function getMarkdownLink(exercise) {
@@ -25,8 +26,8 @@ function App() {
           </Example>
         </Route>
         <Route path="/00">
-          <Example markdown={getMarkdownLink('00')}>
-            <Fun00 />
+          <Example markdown={getMarkdownLink('00')} backLink={null}>
+            <Watch />
           </Example>
         </Route>
         <Route path="/">

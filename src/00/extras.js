@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 export const useKeyDown = function useKeyDown(send) {
   useEffect(() => {
-    console.log('useKeyDown - useEffect');
     const handleKeyDown = (e) => {
       switch (e.key) {
         case 'a':
