@@ -2,59 +2,72 @@ import React, { useEffect } from 'react';
 import { createMachine } from 'xstate';
 import { useMachine } from '@xstate/react';
 
-const toggleMachine = createMachine(
+const myMachine = createMachine(
   {
-    id: 'toggle',
-    initial: 'off',
+    type: 'parallel',
     states: {
-      off: {
-        entry: ['persistState'],
-        on: {
-          click: {
-            target: 'on',
+      A: {
+        initial: 'B',
+        states: {
+          B: {
+            on: {
+              alpha: 'C',
+            },
+          },
+          C: {
+            on: {
+              beta: {
+                target: 'B',
+                cond: 'inG',
+              },
+            },
           },
         },
       },
-      on: {
-        entry: ['persistState'],
-        on: {
-          click: {
-            target: 'off',
+      D: {
+        initial: 'F',
+        states: {
+          F: {
+            on: {
+              mu: 'E',
+              alpha: 'G',
+            },
+          },
+          G: {
+            on: {
+              delta: 'F',
+            },
+          },
+          E: {
+            on: {
+              gamma: 'G',
+            },
           },
         },
       },
     },
   },
   {
-    actions: {
-      persistState: (context, event) => {
-        console.log('persistState');
-      },
+    guards: {
+      inG: (context, event, condMeta) => condMeta.state.matches({ D: 'G' }),
     },
   }
 );
 
-const persistedState = JSON.parse(
-  localStorage.getItem('scratch') || toggleMachine.initialState
-);
+// const persistedState = JSON.parse(
+//   localStorage.getItem('scratch') || toggleMachine.initialState
+// );
 
 export const ScratchApp = () => {
-  const [state, send] = useMachine(toggleMachine, {
+  const [state, send] = useMachine(myMachine, {
     devTools: true,
-    state: persistedState,
-    actions: {
-      persistState: (context, event) => {
-        console.log('YAS');
-      },
-    },
   });
 
   return (
     <div style={{ padding: '32px' }}>
       <p>
-        Machine state: <span>{state.value}</span>
+        Hello! <span>{state.toStrings().join(' ')}</span>
       </p>
-      <button onClick={() => send('click')}>Toggle</button>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import './App.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Example } from './Example';
 import { Watch } from './00/Watch';
+import { Toggle } from './01/Toggle';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
@@ -28,6 +29,11 @@ function App() {
         <Route path="/00">
           <Example markdown={getMarkdownLink('00')} backLink={null}>
             <Watch />
+          </Example>
+        </Route>
+        <Route path="/01">
+          <Example markdown={getMarkdownLink('01')}>
+            <Toggle />
           </Example>
         </Route>
         <Route path="/">

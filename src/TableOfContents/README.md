@@ -1,4 +1,5 @@
 ## Examples
 
 - [Scratch](./scratch)
-- [Example 00](./00)
+- [Watch](./00)
+- [Toggle](./01)

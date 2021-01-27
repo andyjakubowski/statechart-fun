@@ -20,115 +20,166 @@ const watchMachine = createMachine(
         },
       },
       alive: {
-        initial: 'regular',
+        initial: 'regularAndBeep',
         states: {
-          regular: {
-            initial: 'time',
+          regularAndBeep: {
+            type: 'parallel',
             states: {
-              time: {
-                id: 'time',
-                on: {
-                  C_PRESSED: {
-                    target: '#wait',
-                  },
-                  D_PRESSED: {
-                    target: 'date',
-                  },
-                },
-              },
-              date: {
-                after: {
-                  IDLENESS_DELAY: {
-                    target: 'time',
-                  },
-                },
-                on: {
-                  D_PRESSED: {
-                    target: 'time',
-                  },
-                },
-              },
-              update: {
-                initial: 'sec',
+              regular: {
+                initial: 'time',
                 states: {
-                  sec: {
-                    id: 'sec',
+                  time: {
+                    id: 'time',
                     on: {
                       C_PRESSED: {
-                        target: '1min',
+                        target: '#wait',
                       },
-                    },
-                  },
-                  '1min': {
-                    on: {
-                      C_PRESSED: {
-                        target: '10min',
-                      },
-                    },
-                  },
-                  '10min': {
-                    on: {
-                      C_PRESSED: {
-                        target: 'hr',
-                      },
-                    },
-                  },
-                  hr: {
-                    on: {
-                      C_PRESSED: {
-                        target: 'mon',
-                      },
-                    },
-                  },
-                  mon: {
-                    on: {
-                      C_PRESSED: {
+                      D_PRESSED: {
                         target: 'date',
                       },
                     },
                   },
                   date: {
+                    after: {
+                      IDLENESS_DELAY: {
+                        target: 'time',
+                      },
+                    },
                     on: {
-                      C_PRESSED: {
-                        target: 'day',
+                      D_PRESSED: {
+                        target: 'time',
                       },
                     },
                   },
-                  day: {
-                    on: {
-                      C_PRESSED: {
-                        target: 'year',
+                  update: {
+                    initial: 'sec',
+                    states: {
+                      sec: {
+                        id: 'sec',
+                        on: {
+                          C_PRESSED: {
+                            target: '1min',
+                          },
+                        },
+                      },
+                      '1min': {
+                        on: {
+                          C_PRESSED: {
+                            target: '10min',
+                          },
+                        },
+                      },
+                      '10min': {
+                        on: {
+                          C_PRESSED: {
+                            target: 'hr',
+                          },
+                        },
+                      },
+                      hr: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'mon',
+                          },
+                        },
+                      },
+                      mon: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'date',
+                          },
+                        },
+                      },
+                      date: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'day',
+                          },
+                        },
+                      },
+                      day: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'year',
+                          },
+                        },
+                      },
+                      year: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'mode',
+                          },
+                        },
+                      },
+                      mode: {
+                        on: {
+                          C_PRESSED: {
+                            target: '#time',
+                          },
+                        },
                       },
                     },
-                  },
-                  year: {
                     on: {
-                      C_PRESSED: {
-                        target: 'mode',
+                      B_PRESSED: {
+                        target: 'time',
                       },
                     },
-                  },
-                  mode: {
-                    on: {
-                      C_PRESSED: {
-                        target: '#time',
+                    after: {
+                      IDLENESS_DELAY: {
+                        target: 'time',
                       },
                     },
                   },
                 },
-                on: {
-                  B_PRESSED: {
-                    target: 'time',
+              },
+              'beep-test': {
+                initial: '00',
+                states: {
+                  '00': {
+                    on: {
+                      B_PRESSED: {
+                        target: '10',
+                      },
+                      D_PRESSED: {
+                        target: '01',
+                      },
+                    },
                   },
-                },
-                after: {
-                  IDLENESS_DELAY: {
-                    target: 'time',
+                  10: {
+                    on: {
+                      B_RELEASED: {
+                        target: '00',
+                      },
+                      D_PRESSED: {
+                        target: 'beep',
+                      },
+                    },
+                  },
+                  '01': {
+                    on: {
+                      D_RELEASED: {
+                        target: '00',
+                      },
+                      B_PRESSED: {
+                        target: 'beep',
+                      },
+                    },
+                  },
+                  beep: {
+                    on: {
+                      B_RELEASED: {
+                        target: '01',
+                      },
+                      D_RELEASED: {
+                        target: '10',
+                      },
+                    },
                   },
                 },
               },
             },
           },
+
           wait: {
             id: 'wait',
             after: {
@@ -224,13 +275,19 @@ export const Watch = function Watch() {
   useKeyDown(send);
   useKeyUp(send);
 
+  const isBeepTestBeeping = state.matches(
+    'alive.regularAndBeep.beep-test.beep'
+  );
+  const watchName = isBeepTestBeeping ? 'BEEP!' : 'Citizen';
   const mainDisplay = (function renderMainDisplay() {
     if (state.matches('dead')) {
       return '';
     } else if (state.matches('alive')) {
-      if (['alive.regular.time', 'alive.wait'].some(state.matches)) {
+      if (
+        ['alive.regularAndBeep.regular.time', 'alive.wait'].some(state.matches)
+      ) {
         return '10:27 AM';
-      } else if (state.matches('alive.regular.date')) {
+      } else if (state.matches('alive.regularAndBeep.regular.date')) {
         return 'Wed, Jan 27';
       }
     }
@@ -245,7 +302,7 @@ export const Watch = function Watch() {
         <HStack>
           <WatchButton send={send}>a</WatchButton>
           <VStack className="Watch__face" padding="16">
-            <div style={watchNameStyle}>Citizen</div>
+            <div style={watchNameStyle}>{watchName}</div>
             <VStack style={displayStyle}>{mainDisplay}</VStack>
           </VStack>
           <VStack alignment="leading" spacing="8">
