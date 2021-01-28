@@ -1,7 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Example } from './Example';
-import { Watch } from './00/Watch';
+import { WatchCase as Watch } from './00/Watch';
 import { Toggle } from './01/Toggle';
 import { ClearHistory } from './02/ClearHistory';
 import { WatchCase } from './03/WatchCase';

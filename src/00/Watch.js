@@ -1,10 +1,9 @@
 import './Watch.scss';
 import React from 'react';
 import { createMachine, actions } from 'xstate';
-import { useMachine } from '@xstate/react';
-import { HStack, VStack, ZStack, Spacer } from '../Stacks/Stacks';
+import { useMachine, useActor } from '@xstate/react';
+import { HStack, VStack } from '../Stacks/Stacks';
 import { useKeyDown, useKeyUp } from './extras';
-import cn from 'classnames';
 
 const { log } = actions;
 const seconds = function seconds(num) {
@@ -13,15 +12,11 @@ const seconds = function seconds(num) {
 const watchMachine = createMachine(
   {
     id: 'watch',
-    initial: 'dead',
+    initial: 'alive',
     states: {
       dead: {
         id: 'dead',
-        on: {
-          INSERT_BATTERY: {
-            target: 'alive',
-          },
-        },
+        type: 'final',
       },
       alive: {
         type: 'parallel',
@@ -599,11 +594,6 @@ const watchMachine = createMachine(
             },
           },
         },
-        on: {
-          REMOVE_BATTERY: {
-            target: 'dead',
-          },
-        },
       },
     },
   },
@@ -619,6 +609,37 @@ const watchMachine = createMachine(
       P: () => true,
       P1: () => true,
       P2: () => true,
+    },
+  }
+);
+
+const watchCaseMachine = createMachine(
+  {
+    id: 'WatchCase',
+    initial: 'dead',
+    states: {
+      dead: {
+        on: {
+          INSERT_BATTERY: 'alive',
+        },
+      },
+      alive: {
+        invoke: {
+          id: 'watch',
+          src: 'watchMachine',
+          onDone: {
+            target: 'dead',
+          },
+        },
+        on: {
+          REMOVE_BATTERY: 'dead',
+        },
+      },
+    },
+  },
+  {
+    services: {
+      watchMachine,
     },
   }
 );
@@ -680,10 +701,28 @@ const SmallDisplayAreas = function SmallDisplayAreas() {
   );
 };
 
-export const Watch = function Watch() {
-  const [state, send] = useMachine(watchMachine, {
+export const WatchCase = function WatchCase() {
+  const [state, send] = useMachine(watchCaseMachine, {
     devTools: true,
   });
+  const watchRef = state?.children?.watch;
+  const watchEl = watchRef ? <Watch watchRef={watchRef} /> : null;
+
+  return (
+    <div className="WatchContainer">
+      <pre className="Watch__state-label">
+        WatchCase State:
+        {`\n${state.toStrings().join('\n')}`}
+      </pre>
+      {watchEl}
+      <button onClick={() => send('INSERT_BATTERY')}>Insert battery</button>
+      <button onClick={() => send('REMOVE_BATTERY')}>Remove battery</button>
+    </div>
+  );
+};
+
+const Watch = function Watch({ watchRef }) {
+  const [state, send] = useActor(watchRef);
   useKeyDown(send);
   useKeyUp(send);
 
@@ -711,27 +750,23 @@ export const Watch = function Watch() {
   })();
 
   return (
-    <div className="WatchContainer">
-      <VStack className="Watch" spacing="8">
-        <pre className="Watch__state-label">
-          State:
-          {`\n${state.toStrings().join('\n')}`}
-        </pre>
-        <HStack>
-          <WatchButton send={send}>a</WatchButton>
-          <VStack className="Watch__face" padding="16">
-            <div style={watchNameStyle}>{watchName}</div>
-            <VStack style={displayStyle}>{mainDisplay}</VStack>
-          </VStack>
-          <VStack alignment="leading" spacing="8">
-            <WatchButton send={send}>b</WatchButton>
-            <WatchButton send={send}>c</WatchButton>
-            <WatchButton send={send}>d</WatchButton>
-          </VStack>
-        </HStack>
-        <button onClick={() => send('INSERT_BATTERY')}>Insert battery</button>
-        <button onClick={() => send('REMOVE_BATTERY')}>Remove battery</button>
-      </VStack>
-    </div>
+    <VStack className="Watch" spacing="8">
+      <pre className="Watch__state-label">
+        Watch State:
+        {`\n${state.toStrings().join('\n')}`}
+      </pre>
+      <HStack>
+        <WatchButton send={send}>a</WatchButton>
+        <VStack className="Watch__face" padding="16">
+          <div style={watchNameStyle}>{watchName}</div>
+          <VStack style={displayStyle}>{mainDisplay}</VStack>
+        </VStack>
+        <VStack alignment="leading" spacing="8">
+          <WatchButton send={send}>b</WatchButton>
+          <WatchButton send={send}>c</WatchButton>
+          <WatchButton send={send}>d</WatchButton>
+        </VStack>
+      </HStack>
+    </VStack>
   );
 };
