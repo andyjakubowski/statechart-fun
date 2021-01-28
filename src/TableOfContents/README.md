@@ -3,3 +3,5 @@
 - [Scratch](./scratch)
 - [Watch](./00)
 - [Toggle](./01)
+- [ClearHistory](./02)
+- [WatchCase](./03)
