@@ -388,11 +388,12 @@ const watchMachine = createMachine(
                           D_PRESSED: [
                             {
                               target: 'lap',
-                              cond: 'inOn',
+                              in: '#watch.alive.stopwatch.displayAndRun.run.on',
                             },
                             {
                               target: '#zero',
-                              cond: 'inOff',
+                              in:
+                                '#watch.alive.stopwatch.displayAndRun.run.off',
                             },
                           ],
                         },
@@ -407,6 +408,7 @@ const watchMachine = createMachine(
                     },
                   },
                   run: {
+                    id: 'run',
                     states: {
                       on: {
                         on: {
@@ -448,13 +450,7 @@ const watchMachine = createMachine(
       WAIT_DELAY: seconds(2),
     },
     actions: {},
-    guards: {
-      inOn: (context, event, guardMeta) => {
-        return guardMeta.state.matches('alive.stopwatch.displayAndRun.run.on');
-      },
-      inOff: (context, event, guardMeta) =>
-        guardMeta.state.matches('alive.stopwatch.displayAndRun.run.off'),
-    },
+    guards: {},
   }
 );
 
