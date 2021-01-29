@@ -5,3 +5,4 @@
 - [Toggle](./01)
 - [ClearHistory](./02)
 - [WatchCase](./03)
+- [Ticker](./04)
