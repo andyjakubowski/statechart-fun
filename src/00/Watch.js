@@ -5,7 +5,7 @@ import { useMachine, useActor } from '@xstate/react';
 import { HStack, VStack } from '../Stacks/Stacks';
 import { useKeyDown, useKeyUp } from './extras';
 
-const { log } = actions;
+const { assign, send, pure, log } = actions;
 const seconds = function seconds(num) {
   return num * 1000;
 };
@@ -13,6 +13,12 @@ const watchMachine = createMachine(
   {
     id: 'watch',
     initial: 'alive',
+    context: {
+      T: 0,
+      T1: 3000,
+      T2: 3000,
+      TICK_INTERVAL: 1000,
+    },
     states: {
       dead: {
         id: 'dead',
@@ -20,6 +26,9 @@ const watchMachine = createMachine(
       },
       alive: {
         type: 'parallel',
+        invoke: {
+          src: 'ticker',
+        },
         states: {
           'alarm-1-status': {
             initial: 'disabled',
@@ -570,7 +579,7 @@ const watchMachine = createMachine(
                     },
                   ],
                   T_HITS_T2: {
-                    target: 'alarms-beep.alarm-1-beeps',
+                    target: 'alarms-beep.alarm-2-beeps',
                     cond: 'P2',
                   },
                 },
@@ -594,6 +603,28 @@ const watchMachine = createMachine(
             },
           },
         },
+        on: {
+          TICK: {
+            actions: [
+              log('TICK!'),
+              assign({
+                T: (ctx) => ctx.T + ctx.TICK_INTERVAL,
+              }),
+              pure((ctx) => {
+                let actions = [];
+                if (ctx.T === ctx.T1) {
+                  actions.push(send('T_HITS_T1'));
+                }
+
+                if (ctx.T === ctx.T2) {
+                  actions.push(send('T_HITS_T2'));
+                }
+
+                return actions;
+              }),
+            ],
+          },
+        },
       },
     },
   },
@@ -606,9 +637,34 @@ const watchMachine = createMachine(
     },
     actions: {},
     guards: {
-      P: () => true,
-      P1: () => true,
-      P2: () => true,
+      P: (ctx, _, condMeta) => {
+        return (
+          ctx.T1 === ctx.T2 &&
+          condMeta.state.matches('alive.alarm-1-status.enabled') &&
+          condMeta.state.matches('alive.alarm-2-status.enabled')
+        );
+      },
+      P1: (ctx, _, condMeta) => {
+        return (
+          condMeta.state.matches('alive.alarm-1-status.enabled') &&
+          (condMeta.state.matches('alive.alarm-2-status.disabled') ||
+            ctx.T1 !== ctx.T2)
+        );
+      },
+      P2: (ctx, _, condMeta) => {
+        return (
+          condMeta.state.matches('alive.alarm-2-status.enabled') &&
+          (condMeta.state.matches('alive.alarm-1-status.disabled') ||
+            ctx.T1 !== ctx.T2)
+        );
+      },
+    },
+    services: {
+      ticker: (context) => (callback) => {
+        const id = setInterval(() => callback('TICK'), context.TICK_INTERVAL);
+
+        return () => clearInterval(id);
+      },
     },
   }
 );
