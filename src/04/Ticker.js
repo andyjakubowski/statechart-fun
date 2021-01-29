@@ -1,13 +1,14 @@
 import React from 'react';
-import { createMachine, assign } from 'xstate';
+import { createMachine, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
+const { choose, log, assign, send, pure } = actions;
 
 const tickerMachine = createMachine({
   id: 'ticker',
   initial: 'alive',
   context: {
     T: 0,
-    T1: 6000,
+    T1: 4000,
     T2: 2000,
     TICK_INTERVAL: 1000,
   },
@@ -23,20 +24,23 @@ const tickerMachine = createMachine({
       },
       states: {
         regular: {
-          always: [
-            {
-              target: 'beeping.bothBeep',
-              cond: (ctx) => ctx.T === ctx.T1 && ctx.T === ctx.T2,
-            },
-            {
-              target: 'beeping.alarm1Beeps',
-              cond: (ctx) => ctx.T === ctx.T1 && ctx.T1 !== ctx.T2,
-            },
-            {
+          on: {
+            T_HITS_T1: [
+              {
+                target: 'beeping.bothBeep',
+                cond: (ctx) => {
+                  return ctx.T1 === ctx.T2;
+                },
+              },
+              {
+                target: 'beeping.alarm1Beeps',
+              },
+            ],
+            T_HITS_T2: {
               target: 'beeping.alarm2Beeps',
-              cond: (ctx) => ctx.T === ctx.T2 && ctx.T1 !== ctx.T2,
+              cond: () => true,
             },
-          ],
+          },
         },
         beeping: {
           states: {
@@ -57,6 +61,15 @@ const tickerMachine = createMachine({
           actions: [
             assign({
               T: (context) => context.T + context.TICK_INTERVAL,
+            }),
+            pure((ctx) => {
+              let actions = [];
+              if (ctx.T === ctx.T1) {
+                actions.push(send('T_HITS_T1'));
+              } else if (ctx.T === ctx.T2) {
+                actions.push(send('T_HITS_T2'));
+              }
+              return actions;
             }),
           ],
         },
