@@ -7,6 +7,7 @@ import { ClearHistory } from './02/ClearHistory';
 import { WatchCase } from './03/WatchCase';
 import { Ticker } from './04/Ticker';
 import { Updater } from './05/Updater';
+import { Updater as Updater2 } from './06/Updater';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
@@ -60,6 +61,12 @@ function App() {
             <Updater />
           </Example>
         </Route>
+        <Route path="/06">
+          <Example markdown={getMarkdownLink('06')}>
+            <Updater2 />
+          </Example>
+        </Route>
+
         <Route path="/">
           <Example
             markdown={getMarkdownLink('TableOfContents')}

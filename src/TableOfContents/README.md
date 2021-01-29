@@ -7,3 +7,4 @@
 - [WatchCase](./03)
 - [Ticker](./04)
 - [Updater](./05)
+- [Updater #2](./06)
