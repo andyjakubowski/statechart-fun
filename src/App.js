@@ -8,6 +8,7 @@ import { WatchCase } from './03/WatchCase';
 import { Ticker } from './04/Ticker';
 import { Updater } from './05/Updater';
 import { Updater as Updater2 } from './06/Updater';
+import { ActionMeta } from './07/ActionMeta';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
@@ -66,7 +67,11 @@ function App() {
             <Updater2 />
           </Example>
         </Route>
-
+        <Route path="/07">
+          <Example markdown={getMarkdownLink('07')}>
+            <ActionMeta />
+          </Example>
+        </Route>
         <Route path="/">
           <Example
             markdown={getMarkdownLink('TableOfContents')}
