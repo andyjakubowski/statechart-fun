@@ -1,5 +1,5 @@
 import React from 'react';
-import { createMachine, assign, send } from 'xstate';
+import { createMachine, assign } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 const tickerMachine = createMachine({
