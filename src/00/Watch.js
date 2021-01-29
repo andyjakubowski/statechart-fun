@@ -9,11 +9,62 @@ const { assign, send, pure, log } = actions;
 const seconds = function seconds(num) {
   return num * 1000;
 };
+const incrementSec = function incrementSec(sec) {
+  return (sec + 1) % 60;
+};
+const incrementOneMin = function incrementOneMin(min) {
+  return (min + 1) % 10;
+};
+const incrementTenMin = function incrementTenMin(min) {
+  return (min + 1) % 6;
+};
+const incrementHr = function incrementHr(hr, hourMode24 = true) {
+  if (hourMode24) {
+    return (hr + 1) % 24;
+  }
+};
+const getTickTimeIncrementActions = function getTickTimeIncrementActions(ctx) {
+  let actions = ['incrementSec'];
+  let newSec = incrementSec(ctx.sec);
+  let newOneMin;
+  let newTenMin;
+
+  const crossedBorderline = function crossedBorderline(time) {
+    return time === 0;
+  };
+
+  if (!crossedBorderline(newSec)) {
+    return actions;
+  }
+
+  newOneMin = incrementOneMin(ctx.oneMin);
+  actions.push('incrementOneMin');
+
+  if (!crossedBorderline(newOneMin)) {
+    return actions;
+  }
+
+  newTenMin = incrementTenMin(ctx.tenMin);
+  actions.push('incrementTenMin');
+
+  if (!crossedBorderline(newTenMin)) {
+    return actions;
+  }
+
+  actions.push('incrementHr');
+  return actions;
+};
+const areTimesEqual = function areTimesEqual(a, b) {};
+
 const watchMachine = createMachine(
   {
     id: 'watch',
     initial: 'alive',
     context: {
+      sec: 50,
+      oneMin: 0,
+      tenMin: 0,
+      hr: 0,
       T: 0,
       T1: 3000,
       T2: 3000,
@@ -26,9 +77,9 @@ const watchMachine = createMachine(
       },
       alive: {
         type: 'parallel',
-        invoke: {
-          src: 'ticker',
-        },
+        // invoke: {
+        //   src: 'ticker',
+        // },
         states: {
           'alarm-1-status': {
             initial: 'disabled',
@@ -191,12 +242,16 @@ const watchMachine = createMachine(
                           },
                           update: {
                             initial: 'sec',
+                            entry: log('update entry'),
                             states: {
                               sec: {
                                 id: 'sec',
                                 on: {
                                   C_PRESSED: {
                                     target: '1min',
+                                  },
+                                  D_PRESSED: {
+                                    actions: 'incrementSec',
                                   },
                                 },
                               },
@@ -205,6 +260,9 @@ const watchMachine = createMachine(
                                   C_PRESSED: {
                                     target: '10min',
                                   },
+                                  D_PRESSED: {
+                                    actions: 'incrementOneMin',
+                                  },
                                 },
                               },
                               '10min': {
@@ -212,12 +270,18 @@ const watchMachine = createMachine(
                                   C_PRESSED: {
                                     target: 'hr',
                                   },
+                                  D_PRESSED: {
+                                    actions: 'incrementTenMin',
+                                  },
                                 },
                               },
                               hr: {
                                 on: {
                                   C_PRESSED: {
                                     target: 'mon',
+                                  },
+                                  D_PRESSED: {
+                                    actions: 'incrementHr',
                                   },
                                 },
                               },
@@ -262,11 +326,12 @@ const watchMachine = createMachine(
                                 target: 'time',
                               },
                             },
-                            after: {
-                              IDLENESS_DELAY: {
+                            after: [
+                              {
+                                delay: 'IDLENESS_DELAY',
                                 target: 'time',
                               },
-                            },
+                            ],
                           },
                         },
                       },
@@ -607,21 +672,22 @@ const watchMachine = createMachine(
           TICK: {
             actions: [
               log('TICK!'),
-              assign({
-                T: (ctx) => ctx.T + ctx.TICK_INTERVAL,
-              }),
-              pure((ctx) => {
-                let actions = [];
-                if (ctx.T === ctx.T1) {
-                  actions.push(send('T_HITS_T1'));
-                }
+              pure((ctx) => getTickTimeIncrementActions(ctx)),
+              // assign({
+              //   T: (ctx) => ctx.T + ctx.TICK_INTERVAL,
+              // }),
+              // pure((ctx) => {
+              //   let actions = [];
+              //   if (ctx.T === ctx.T1) {
+              //     actions.push(send('T_HITS_T1'));
+              //   }
 
-                if (ctx.T === ctx.T2) {
-                  actions.push(send('T_HITS_T2'));
-                }
+              //   if (ctx.T === ctx.T2) {
+              //     actions.push(send('T_HITS_T2'));
+              //   }
 
-                return actions;
-              }),
+              //   return actions;
+              // }),
             ],
           },
         },
@@ -630,12 +696,25 @@ const watchMachine = createMachine(
   },
   {
     delays: {
-      IDLENESS_DELAY: seconds(30),
+      IDLENESS_DELAY: seconds(10),
       WAIT_DELAY: seconds(2),
       ALARM_BEEPS_DELAY: seconds(30),
       CHIME_BEEP_DURATION: seconds(2),
     },
-    actions: {},
+    actions: {
+      incrementSec: assign({
+        sec: (ctx) => incrementSec(ctx.sec),
+      }),
+      incrementOneMin: assign({
+        oneMin: (ctx) => incrementOneMin(ctx.oneMin),
+      }),
+      incrementTenMin: assign({
+        tenMin: (ctx) => incrementTenMin(ctx.tenMin),
+      }),
+      incrementHr: assign({
+        hr: (ctx) => incrementHr(ctx.hr),
+      }),
+    },
     guards: {
       P: (ctx, _, condMeta) => {
         return (
@@ -672,7 +751,7 @@ const watchMachine = createMachine(
 const watchCaseMachine = createMachine(
   {
     id: 'WatchCase',
-    initial: 'dead',
+    initial: 'alive',
     states: {
       dead: {
         on: {
@@ -765,15 +844,15 @@ export const WatchCase = function WatchCase() {
   const watchEl = watchRef ? <Watch watchRef={watchRef} /> : null;
 
   return (
-    <div className="WatchContainer">
-      <pre className="Watch__state-label">
+    <VStack className="WatchContainer">
+      {/* <pre className="Watch__state-label">
         WatchCase State:
         {`\n${state.toStrings().join('\n')}`}
-      </pre>
+      </pre> */}
       {watchEl}
       <button onClick={() => send('INSERT_BATTERY')}>Insert battery</button>
       <button onClick={() => send('REMOVE_BATTERY')}>Remove battery</button>
-    </div>
+    </VStack>
   );
 };
 
@@ -808,9 +887,11 @@ const Watch = function Watch({ watchRef }) {
   return (
     <VStack className="Watch" spacing="8">
       <pre className="Watch__state-label">
+        {`Context:\n${JSON.stringify(state.context)}\n`}
         Watch State:
         {`\n${state.toStrings().join('\n')}`}
       </pre>
+
       <HStack>
         <WatchButton send={send}>a</WatchButton>
         <VStack className="Watch__face" padding="16">
