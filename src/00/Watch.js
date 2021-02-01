@@ -24,51 +24,64 @@ const incrementHr = function incrementHr(hr, hourMode24 = true) {
     return (hr + 1) % 24;
   }
 };
-const getTickTimeIncrementActions = function getTickTimeIncrementActions(ctx) {
-  let actions = ['incrementSec'];
-  let newSec = incrementSec(ctx.sec);
-  let newOneMin;
-  let newTenMin;
 
+const getTimeAfterTick = function getTimeAfterTick({
+  sec,
+  oneMin,
+  tenMin,
+  hr,
+}) {
   const crossedBorderline = function crossedBorderline(time) {
     return time === 0;
   };
 
-  if (!crossedBorderline(newSec)) {
-    return actions;
-  }
+  const newSec = incrementSec(sec);
+  let newOneMin = crossedBorderline(newSec) ? incrementOneMin(oneMin) : oneMin;
+  let newTenMin = crossedBorderline(newOneMin)
+    ? incrementOneMin(tenMin)
+    : tenMin;
+  let newHr = crossedBorderline(newTenMin) ? incrementOneMin(hr) : hr;
 
-  newOneMin = incrementOneMin(ctx.oneMin);
-  actions.push('incrementOneMin');
-
-  if (!crossedBorderline(newOneMin)) {
-    return actions;
-  }
-
-  newTenMin = incrementTenMin(ctx.tenMin);
-  actions.push('incrementTenMin');
-
-  if (!crossedBorderline(newTenMin)) {
-    return actions;
-  }
-
-  actions.push('incrementHr');
-  return actions;
+  return {
+    sec: newSec,
+    oneMin: newOneMin,
+    tenMin: newTenMin,
+    hr: newHr,
+  };
 };
-const areTimesEqual = function areTimesEqual(a, b) {};
+
+const areTimesEqual = function areTimesEqual(a, b) {
+  return (
+    a.sec === b.sec &&
+    a.oneMin === b.oneMin &&
+    a.tenMin === b.tenMin &&
+    a.hr === b.hr
+  );
+};
 
 const watchMachine = createMachine(
   {
     id: 'watch',
     initial: 'alive',
     context: {
-      sec: 50,
-      oneMin: 0,
-      tenMin: 0,
-      hr: 0,
-      T: 0,
-      T1: 3000,
-      T2: 3000,
+      T: {
+        sec: 55,
+        oneMin: 5,
+        tenMin: 1,
+        hr: 11,
+      },
+      T1: {
+        sec: 0,
+        oneMin: 6,
+        tenMin: 1,
+        hr: 11,
+      },
+      T2: {
+        sec: 0,
+        oneMin: 6,
+        tenMin: 1,
+        hr: 11,
+      },
       TICK_INTERVAL: 1000,
     },
     states: {
@@ -78,9 +91,9 @@ const watchMachine = createMachine(
       },
       alive: {
         type: 'parallel',
-        // invoke: {
-        //   src: 'ticker',
-        // },
+        invoke: {
+          src: 'ticker',
+        },
         states: {
           'alarm-1-status': {
             initial: 'disabled',
@@ -714,23 +727,26 @@ const watchMachine = createMachine(
         on: {
           TICK: {
             actions: [
-              log('TICK!'),
-              pure((ctx) => getTickTimeIncrementActions(ctx)),
-              // assign({
-              //   T: (ctx) => ctx.T + ctx.TICK_INTERVAL,
-              // }),
-              // pure((ctx) => {
-              //   let actions = [];
-              //   if (ctx.T === ctx.T1) {
-              //     actions.push(send('T_HITS_T1'));
-              //   }
+              pure((ctx) => {
+                let actions = [];
 
-              //   if (ctx.T === ctx.T2) {
-              //     actions.push(send('T_HITS_T2'));
-              //   }
+                const newTime = getTimeAfterTick(ctx.T);
+                actions.push(
+                  assign({
+                    T: newTime,
+                  })
+                );
 
-              //   return actions;
-              // }),
+                if (areTimesEqual(newTime, ctx.T1)) {
+                  actions.push(send('T_HITS_T1'));
+                }
+
+                if (areTimesEqual(newTime, ctx.T2)) {
+                  actions.push(send('T_HITS_T2'));
+                }
+
+                return actions;
+              }),
             ],
           },
         },
@@ -747,22 +763,34 @@ const watchMachine = createMachine(
     actions: {
       resetIdlenessTimer: send('RESET_IDLENESS_TIMER', { to: 'idlenessTimer' }),
       incrementSec: assign({
-        sec: (ctx) => incrementSec(ctx.sec),
+        T: (ctx) => ({
+          ...ctx.T,
+          sec: incrementSec(ctx.T.sec),
+        }),
       }),
       incrementOneMin: assign({
-        oneMin: (ctx) => incrementOneMin(ctx.oneMin),
+        T: (ctx) => ({
+          ...ctx.T,
+          oneMin: incrementOneMin(ctx.T.oneMin),
+        }),
       }),
       incrementTenMin: assign({
-        tenMin: (ctx) => incrementTenMin(ctx.tenMin),
+        T: (ctx) => ({
+          ...ctx.T,
+          tenMin: incrementTenMin(ctx.T.tenMin),
+        }),
       }),
       incrementHr: assign({
-        hr: (ctx) => incrementHr(ctx.hr),
+        T: (ctx) => ({
+          ...ctx.T,
+          hr: incrementHr(ctx.T.hr),
+        }),
       }),
     },
     guards: {
       P: (ctx, _, condMeta) => {
         return (
-          ctx.T1 === ctx.T2 &&
+          areTimesEqual(ctx.T1, ctx.T2) &&
           condMeta.state.matches('alive.alarm-1-status.enabled') &&
           condMeta.state.matches('alive.alarm-2-status.enabled')
         );
@@ -771,14 +799,14 @@ const watchMachine = createMachine(
         return (
           condMeta.state.matches('alive.alarm-1-status.enabled') &&
           (condMeta.state.matches('alive.alarm-2-status.disabled') ||
-            ctx.T1 !== ctx.T2)
+            !areTimesEqual(ctx.T1, ctx.T2))
         );
       },
       P2: (ctx, _, condMeta) => {
         return (
           condMeta.state.matches('alive.alarm-2-status.enabled') &&
           (condMeta.state.matches('alive.alarm-1-status.disabled') ||
-            ctx.T1 !== ctx.T2)
+            !areTimesEqual(ctx.T1, ctx.T2))
         );
       },
     },
@@ -948,11 +976,19 @@ const Watch = function Watch({ watchRef }) {
 
   return (
     <VStack className="Watch" spacing="8">
-      <pre className="Watch__state-label">
+      <div className="Watch__state-label">
         {`Context:\n${JSON.stringify(state.context)}\n`}
+      </div>
+      <div className="Watch__state-label">
         Watch State:
-        {`\n${state.toStrings().join('\n')}`}
-      </pre>
+        <br />
+        {state.toStrings().map((string, i) => (
+          <div key={i}>
+            {string}
+            <br />
+          </div>
+        ))}
+      </div>
 
       <HStack>
         <WatchButton send={send}>a</WatchButton>
