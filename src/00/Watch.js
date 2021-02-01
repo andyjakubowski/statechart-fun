@@ -31,18 +31,20 @@ const getTimeAfterTick = function getTimeAfterTick({
   tenMin,
   hr,
 }) {
-  const crossedBorderline = function crossedBorderline(time) {
-    return time === 0;
+  const crossedBorderline = function crossedBorderline(time, newTime) {
+    return time !== newTime && newTime === 0;
   };
 
   const newSec = incrementByOneSec(sec);
-  let newOneMin = crossedBorderline(newSec)
+  const newOneMin = crossedBorderline(sec, newSec)
     ? incrementByOneMin(oneMin)
     : oneMin;
-  let newTenMin = crossedBorderline(newOneMin)
+  const newTenMin = crossedBorderline(oneMin, newOneMin)
     ? incrementByTenMin(tenMin)
     : tenMin;
-  let newHr = crossedBorderline(newTenMin) ? incrementByOneHour(hr) : hr;
+  const newHr = crossedBorderline(tenMin, newTenMin)
+    ? incrementByOneHour(hr)
+    : hr;
 
   return {
     sec: newSec,
@@ -103,8 +105,8 @@ const watchMachine = createMachine(
     context: {
       T: {
         sec: 55,
-        oneMin: 5,
-        tenMin: 1,
+        oneMin: 0,
+        tenMin: 0,
         hr: 11,
       },
       T1: {
