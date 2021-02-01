@@ -9,6 +9,7 @@ const { assign, send, pure, log } = actions;
 const seconds = function seconds(num) {
   return num * 1000;
 };
+const IDLENESS_DELAY = seconds(120);
 const incrementSec = function incrementSec(sec) {
   return (sec + 1) % 60;
 };
@@ -242,16 +243,23 @@ const watchMachine = createMachine(
                           },
                           update: {
                             initial: 'sec',
-                            entry: log('update entry'),
+                            invoke: {
+                              id: 'idlenessTimer',
+                              src: 'idlenessTimer',
+                            },
                             states: {
                               sec: {
                                 id: 'sec',
                                 on: {
                                   C_PRESSED: {
                                     target: '1min',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                   D_PRESSED: {
-                                    actions: 'incrementSec',
+                                    actions: [
+                                      'incrementSec',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -259,9 +267,13 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: '10min',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                   D_PRESSED: {
-                                    actions: 'incrementOneMin',
+                                    actions: [
+                                      'incrementOneMin',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -269,9 +281,13 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'hr',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                   D_PRESSED: {
-                                    actions: 'incrementTenMin',
+                                    actions: [
+                                      'incrementTenMin',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -279,9 +295,13 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'mon',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                   D_PRESSED: {
-                                    actions: 'incrementHr',
+                                    actions: [
+                                      'incrementHr',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -289,6 +309,7 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'date',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                 },
                               },
@@ -296,6 +317,7 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'day',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                 },
                               },
@@ -303,6 +325,7 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'year',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                 },
                               },
@@ -310,6 +333,7 @@ const watchMachine = createMachine(
                                 on: {
                                   C_PRESSED: {
                                     target: 'mode',
+                                    actions: ['resetIdlenessTimer'],
                                   },
                                 },
                               },
@@ -325,13 +349,10 @@ const watchMachine = createMachine(
                               B_PRESSED: {
                                 target: 'time',
                               },
-                            },
-                            after: [
-                              {
-                                delay: 'IDLENESS_DELAY',
+                              IDLENESS_TIMER_EXPIRED: {
                                 target: 'time',
                               },
-                            ],
+                            },
                           },
                         },
                       },
@@ -397,6 +418,10 @@ const watchMachine = createMachine(
                   },
                   out: {
                     initial: 'alarm-1',
+                    invoke: {
+                      id: 'idlenessTimer',
+                      src: 'idlenessTimer',
+                    },
                     states: {
                       'alarm-1': {
                         id: 'alarm-1',
@@ -409,6 +434,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'on',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -416,6 +442,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'off',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -423,9 +450,11 @@ const watchMachine = createMachine(
                         on: {
                           A_PRESSED: {
                             target: 'alarm-2.hist',
+                            actions: ['resetIdlenessTimer'],
                           },
                           C_PRESSED: {
                             target: 'update-1.hr',
+                            actions: ['resetIdlenessTimer'],
                           },
                         },
                       },
@@ -435,6 +464,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '10min',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -442,6 +472,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '1min',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -449,6 +480,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '#alarm-1',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -456,6 +488,7 @@ const watchMachine = createMachine(
                         on: {
                           B_PRESSED: {
                             target: 'alarm-1',
+                            actions: ['resetIdlenessTimer'],
                           },
                         },
                       },
@@ -465,6 +498,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '10min',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -472,6 +506,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '1min',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -479,6 +514,7 @@ const watchMachine = createMachine(
                             on: {
                               C_PRESSED: {
                                 target: '#alarm-2',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -486,6 +522,7 @@ const watchMachine = createMachine(
                         on: {
                           B_PRESSED: {
                             target: 'alarm-2',
+                            actions: ['resetIdlenessTimer'],
                           },
                         },
                       },
@@ -500,6 +537,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'on',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -507,6 +545,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'off',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -514,9 +553,11 @@ const watchMachine = createMachine(
                         on: {
                           A_PRESSED: {
                             target: 'chime.hist',
+                            actions: ['resetIdlenessTimer'],
                           },
                           C_PRESSED: {
                             target: 'update-2.hr',
+                            actions: ['resetIdlenessTimer'],
                           },
                         },
                       },
@@ -530,6 +571,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'on',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -537,6 +579,7 @@ const watchMachine = createMachine(
                             on: {
                               D_PRESSED: {
                                 target: 'off',
+                                actions: ['resetIdlenessTimer'],
                               },
                             },
                           },
@@ -548,8 +591,8 @@ const watchMachine = createMachine(
                         },
                       },
                     },
-                    after: {
-                      IDLENESS_DELAY: {
+                    on: {
+                      IDLENESS_TIMER_EXPIRED: {
                         target: 'regularAndBeep',
                       },
                     },
@@ -696,12 +739,13 @@ const watchMachine = createMachine(
   },
   {
     delays: {
-      IDLENESS_DELAY: seconds(10),
+      IDLENESS_DELAY,
       WAIT_DELAY: seconds(2),
       ALARM_BEEPS_DELAY: seconds(30),
       CHIME_BEEP_DURATION: seconds(2),
     },
     actions: {
+      resetIdlenessTimer: send('RESET_IDLENESS_TIMER', { to: 'idlenessTimer' }),
       incrementSec: assign({
         sec: (ctx) => incrementSec(ctx.sec),
       }),
@@ -741,6 +785,24 @@ const watchMachine = createMachine(
     services: {
       ticker: (context) => (callback) => {
         const id = setInterval(() => callback('TICK'), context.TICK_INTERVAL);
+
+        return () => clearInterval(id);
+      },
+      idlenessTimer: () => (callback, onReceive) => {
+        const start = function start() {
+          return setInterval(
+            () => callback('IDLENESS_TIMER_EXPIRED'),
+            IDLENESS_DELAY
+          );
+        };
+        let id = start();
+
+        onReceive((e) => {
+          if (e.type === 'RESET_IDLENESS_TIMER') {
+            clearInterval(id);
+            id = start();
+          }
+        });
 
         return () => clearInterval(id);
       },
