@@ -126,6 +126,10 @@ const areTimesEqual = function areTimesEqual(a, b) {
   );
 };
 
+const isWholeHour = function isWholeHour(time) {
+  return time.sec === 0 && time.oneMin === 0 && time.tenMin === 0;
+};
+
 const createTimeIncrementActions = function createTimeIncrementActions(name) {
   return {
     [`increment${name}ByOneSec`]: assign({
@@ -949,6 +953,10 @@ const watchMachine = createMachine(
 
                 if (areTimesEqual(newTime, ctx.T2)) {
                   actions.push(send('T_HITS_T2'));
+                }
+
+                if (isWholeHour(newTime)) {
+                  actions.push(send('T_IS_WHOLE_HOUR'));
                 }
 
                 return actions;
