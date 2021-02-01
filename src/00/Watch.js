@@ -10,6 +10,7 @@ const seconds = function seconds(num) {
   return num * 1000;
 };
 const IDLENESS_DELAY = seconds(120);
+const CURRENT_YEAR = new Date().getFullYear();
 const incrementByOneSec = function incrementByOneSec(sec) {
   return (sec + 1) % 60;
 };
@@ -25,11 +26,62 @@ const incrementByOneHour = function incrementByOneHour(hr, hourMode24 = true) {
   }
 };
 
+const incrementMonth = function incrementMonth(month) {
+  return (month + 1) % 12;
+};
+const incrementDate = function incrementDate(date, month) {
+  return (date + 1) % daysInMonth(month);
+};
+const incrementDay = function incrementDay(day) {
+  return (day + 1) % 7;
+};
+const incrementYear = function incrementYear(year) {
+  return (year + 1) % (CURRENT_YEAR + 100);
+};
+
+const daysInMonth = function daysInMonth(monthIndex) {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const monthKey = months[monthIndex].toLowerCase();
+  const daysPerMonth = {
+    jan: 31,
+    feb: 29,
+    mar: 31,
+    apr: 30,
+    may: 31,
+    jun: 30,
+    jul: 31,
+    aug: 31,
+    sep: 30,
+    oct: 31,
+    nov: 30,
+    dec: 31,
+  };
+  return daysPerMonth[monthKey];
+};
+
 const getTimeAfterTick = function getTimeAfterTick({
   sec,
   oneMin,
   tenMin,
   hr,
+  mon,
+  date,
+  day,
+  year,
+  ...rest
 }) {
   const crossedBorderline = function crossedBorderline(time, newTime) {
     return time !== newTime && newTime === 0;
@@ -45,12 +97,23 @@ const getTimeAfterTick = function getTimeAfterTick({
   const newHr = crossedBorderline(tenMin, newTenMin)
     ? incrementByOneHour(hr)
     : hr;
+  const newDate = crossedBorderline(hr, newHr)
+    ? incrementDate(date, mon)
+    : date;
+  const newDay = crossedBorderline(hr, newHr) ? incrementDay(day) : day;
+  const newMon = crossedBorderline(date, newDate) ? incrementMonth(mon) : mon;
+  const newYear = crossedBorderline(mon, newMon) ? incrementYear(year) : year;
 
   return {
     sec: newSec,
     oneMin: newOneMin,
     tenMin: newTenMin,
     hr: newHr,
+    mon: newMon,
+    date: newDate,
+    day: newDay,
+    year: newYear,
+    ...rest,
   };
 };
 
@@ -92,6 +155,39 @@ const createTimeIncrementActions = function createTimeIncrementActions(name) {
   };
 };
 
+const dateIncrementActions = {
+  incrementTMonth: assign({
+    T: (ctx) => ({
+      ...ctx.T,
+      mon: incrementMonth(ctx.T.mon),
+    }),
+  }),
+  incrementTDate: assign({
+    T: (ctx) => ({
+      ...ctx.T,
+      date: incrementDate(ctx.T.date, ctx.T.mon),
+    }),
+  }),
+  incrementTDay: assign({
+    T: (ctx) => ({
+      ...ctx.T,
+      day: incrementDay(ctx.T.day),
+    }),
+  }),
+  incrementTYear: assign({
+    T: (ctx) => ({
+      ...ctx.T,
+      year: incrementYear(ctx.T.year),
+    }),
+  }),
+  toggleClockMode: assign({
+    T: (ctx) => ({
+      ...ctx.T,
+      mode: ctx.T.mode === '24h' ? '12h' : '24h',
+    }),
+  }),
+};
+
 const timeIncrementActions = {
   ...createTimeIncrementActions('T'),
   ...createTimeIncrementActions('T1'),
@@ -105,9 +201,14 @@ const watchMachine = createMachine(
     context: {
       T: {
         sec: 55,
-        oneMin: 0,
-        tenMin: 0,
-        hr: 11,
+        oneMin: 9,
+        tenMin: 5,
+        hr: 23,
+        mon: 11,
+        date: 30,
+        day: 0,
+        year: CURRENT_YEAR,
+        mode: '24h',
       },
       T1: {
         sec: 0,
@@ -363,6 +464,12 @@ const watchMachine = createMachine(
                                     target: 'date',
                                     actions: ['resetIdlenessTimer'],
                                   },
+                                  D_PRESSED: {
+                                    actions: [
+                                      'incrementTMonth',
+                                      'resetIdlenessTimer',
+                                    ],
+                                  },
                                 },
                               },
                               date: {
@@ -370,6 +477,12 @@ const watchMachine = createMachine(
                                   C_PRESSED: {
                                     target: 'day',
                                     actions: ['resetIdlenessTimer'],
+                                  },
+                                  D_PRESSED: {
+                                    actions: [
+                                      'incrementTDate',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -379,6 +492,12 @@ const watchMachine = createMachine(
                                     target: 'year',
                                     actions: ['resetIdlenessTimer'],
                                   },
+                                  D_PRESSED: {
+                                    actions: [
+                                      'incrementTDay',
+                                      'resetIdlenessTimer',
+                                    ],
+                                  },
                                 },
                               },
                               year: {
@@ -387,12 +506,24 @@ const watchMachine = createMachine(
                                     target: 'mode',
                                     actions: ['resetIdlenessTimer'],
                                   },
+                                  D_PRESSED: {
+                                    actions: [
+                                      'incrementTYear',
+                                      'resetIdlenessTimer',
+                                    ],
+                                  },
                                 },
                               },
                               mode: {
                                 on: {
                                   C_PRESSED: {
                                     target: '#time',
+                                  },
+                                  D_PRESSED: {
+                                    actions: [
+                                      'toggleClockMode',
+                                      'resetIdlenessTimer',
+                                    ],
                                   },
                                 },
                               },
@@ -831,13 +962,14 @@ const watchMachine = createMachine(
   {
     delays: {
       IDLENESS_DELAY,
-      WAIT_DELAY: seconds(2),
+      WAIT_DELAY: seconds(0.5),
       ALARM_BEEPS_DELAY: seconds(30),
       CHIME_BEEP_DURATION: seconds(2),
     },
     actions: {
       resetIdlenessTimer: send('RESET_IDLENESS_TIMER', { to: 'idlenessTimer' }),
       ...timeIncrementActions,
+      ...dateIncrementActions,
     },
     guards: {
       P: (ctx, _, condMeta) => {
