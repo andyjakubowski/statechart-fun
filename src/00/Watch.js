@@ -10,16 +10,16 @@ const seconds = function seconds(num) {
   return num * 1000;
 };
 const IDLENESS_DELAY = seconds(120);
-const incrementSec = function incrementSec(sec) {
+const incrementByOneSec = function incrementByOneSec(sec) {
   return (sec + 1) % 60;
 };
-const incrementOneMin = function incrementOneMin(min) {
+const incrementByOneMin = function incrementByOneMin(min) {
   return (min + 1) % 10;
 };
-const incrementTenMin = function incrementTenMin(min) {
+const incrementByTenMin = function incrementByTenMin(min) {
   return (min + 1) % 6;
 };
-const incrementHr = function incrementHr(hr, hourMode24 = true) {
+const incrementByOneHour = function incrementByOneHour(hr, hourMode24 = true) {
   if (hourMode24) {
     return (hr + 1) % 24;
   }
@@ -35,12 +35,14 @@ const getTimeAfterTick = function getTimeAfterTick({
     return time === 0;
   };
 
-  const newSec = incrementSec(sec);
-  let newOneMin = crossedBorderline(newSec) ? incrementOneMin(oneMin) : oneMin;
+  const newSec = incrementByOneSec(sec);
+  let newOneMin = crossedBorderline(newSec)
+    ? incrementByOneMin(oneMin)
+    : oneMin;
   let newTenMin = crossedBorderline(newOneMin)
-    ? incrementOneMin(tenMin)
+    ? incrementByTenMin(tenMin)
     : tenMin;
-  let newHr = crossedBorderline(newTenMin) ? incrementOneMin(hr) : hr;
+  let newHr = crossedBorderline(newTenMin) ? incrementByOneHour(hr) : hr;
 
   return {
     sec: newSec,
@@ -57,6 +59,41 @@ const areTimesEqual = function areTimesEqual(a, b) {
     a.tenMin === b.tenMin &&
     a.hr === b.hr
   );
+};
+
+const createTimeIncrementActions = function createTimeIncrementActions(name) {
+  return {
+    [`increment${name}ByOneSec`]: assign({
+      [name]: (ctx) => ({
+        ...ctx[name],
+        sec: incrementByOneSec(ctx[name].sec),
+      }),
+    }),
+    [`increment${name}ByOneMin`]: assign({
+      [name]: (ctx) => ({
+        ...ctx[name],
+        oneMin: incrementByOneMin(ctx[name].oneMin),
+      }),
+    }),
+    [`increment${name}ByTenMin`]: assign({
+      [name]: (ctx) => ({
+        ...ctx[name],
+        tenMin: incrementByTenMin(ctx[name].tenMin),
+      }),
+    }),
+    [`increment${name}ByOneHour`]: assign({
+      [name]: (ctx) => ({
+        ...ctx[name],
+        hr: incrementByOneHour(ctx[name].hr),
+      }),
+    }),
+  };
+};
+
+const timeIncrementActions = {
+  ...createTimeIncrementActions('T'),
+  ...createTimeIncrementActions('T1'),
+  ...createTimeIncrementActions('T2'),
 };
 
 const watchMachine = createMachine(
@@ -270,7 +307,7 @@ const watchMachine = createMachine(
                                   },
                                   D_PRESSED: {
                                     actions: [
-                                      'incrementSec',
+                                      'incrementTByOneSec',
                                       'resetIdlenessTimer',
                                     ],
                                   },
@@ -284,7 +321,7 @@ const watchMachine = createMachine(
                                   },
                                   D_PRESSED: {
                                     actions: [
-                                      'incrementOneMin',
+                                      'incrementTByOneMin',
                                       'resetIdlenessTimer',
                                     ],
                                   },
@@ -298,7 +335,7 @@ const watchMachine = createMachine(
                                   },
                                   D_PRESSED: {
                                     actions: [
-                                      'incrementTenMin',
+                                      'incrementTByTenMin',
                                       'resetIdlenessTimer',
                                     ],
                                   },
@@ -312,7 +349,7 @@ const watchMachine = createMachine(
                                   },
                                   D_PRESSED: {
                                     actions: [
-                                      'incrementHr',
+                                      'incrementTByOneHour',
                                       'resetIdlenessTimer',
                                     ],
                                   },
@@ -479,6 +516,12 @@ const watchMachine = createMachine(
                                 target: '10min',
                                 actions: ['resetIdlenessTimer'],
                               },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT1ByOneHour',
+                                  'resetIdlenessTimer',
+                                ],
+                              },
                             },
                           },
                           '10min': {
@@ -487,6 +530,12 @@ const watchMachine = createMachine(
                                 target: '1min',
                                 actions: ['resetIdlenessTimer'],
                               },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT1ByTenMin',
+                                  'resetIdlenessTimer',
+                                ],
+                              },
                             },
                           },
                           '1min': {
@@ -494,6 +543,12 @@ const watchMachine = createMachine(
                               C_PRESSED: {
                                 target: '#alarm-1',
                                 actions: ['resetIdlenessTimer'],
+                              },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT1ByOneMin',
+                                  'resetIdlenessTimer',
+                                ],
                               },
                             },
                           },
@@ -513,6 +568,12 @@ const watchMachine = createMachine(
                                 target: '10min',
                                 actions: ['resetIdlenessTimer'],
                               },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT2ByOneHour',
+                                  'resetIdlenessTimer',
+                                ],
+                              },
                             },
                           },
                           '10min': {
@@ -521,6 +582,12 @@ const watchMachine = createMachine(
                                 target: '1min',
                                 actions: ['resetIdlenessTimer'],
                               },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT2ByTenMin',
+                                  'resetIdlenessTimer',
+                                ],
+                              },
                             },
                           },
                           '1min': {
@@ -528,6 +595,12 @@ const watchMachine = createMachine(
                               C_PRESSED: {
                                 target: '#alarm-2',
                                 actions: ['resetIdlenessTimer'],
+                              },
+                              D_PRESSED: {
+                                actions: [
+                                  'incrementT2ByOneMin',
+                                  'resetIdlenessTimer',
+                                ],
                               },
                             },
                           },
@@ -762,30 +835,7 @@ const watchMachine = createMachine(
     },
     actions: {
       resetIdlenessTimer: send('RESET_IDLENESS_TIMER', { to: 'idlenessTimer' }),
-      incrementSec: assign({
-        T: (ctx) => ({
-          ...ctx.T,
-          sec: incrementSec(ctx.T.sec),
-        }),
-      }),
-      incrementOneMin: assign({
-        T: (ctx) => ({
-          ...ctx.T,
-          oneMin: incrementOneMin(ctx.T.oneMin),
-        }),
-      }),
-      incrementTenMin: assign({
-        T: (ctx) => ({
-          ...ctx.T,
-          tenMin: incrementTenMin(ctx.T.tenMin),
-        }),
-      }),
-      incrementHr: assign({
-        T: (ctx) => ({
-          ...ctx.T,
-          hr: incrementHr(ctx.T.hr),
-        }),
-      }),
+      ...timeIncrementActions,
     },
     guards: {
       P: (ctx, _, condMeta) => {
