@@ -9,6 +9,7 @@ import { Ticker } from './04/Ticker';
 import { Updater } from './05/Updater';
 import { Updater as Updater2 } from './06/Updater';
 import { ActionMeta } from './07/ActionMeta';
+import { CancelableDelay } from './08/CancelableDelay';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
@@ -70,6 +71,11 @@ function App() {
         <Route path="/07">
           <Example markdown={getMarkdownLink('07')}>
             <ActionMeta />
+          </Example>
+        </Route>
+        <Route path="/08">
+          <Example markdown={getMarkdownLink('08')}>
+            <CancelableDelay />
           </Example>
         </Route>
         <Route path="/">
