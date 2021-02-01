@@ -10,6 +10,7 @@ import { Updater } from './05/Updater';
 import { Updater as Updater2 } from './06/Updater';
 import { ActionMeta } from './07/ActionMeta';
 import { CancelableDelay } from './08/CancelableDelay';
+import { Stopwatch } from './09/Stopwatch';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 import { inspect } from '@xstate/inspect';
@@ -76,6 +77,11 @@ function App() {
         <Route path="/08">
           <Example markdown={getMarkdownLink('08')}>
             <CancelableDelay />
+          </Example>
+        </Route>
+        <Route path="/09">
+          <Example markdown={getMarkdownLink('09')}>
+            <Stopwatch />
           </Example>
         </Route>
         <Route path="/">
