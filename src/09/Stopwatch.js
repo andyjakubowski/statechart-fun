@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export const Stopwatch = () => {
+  const [startMs, setStartMs] = useState(null);
   const [ms, setMs] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -8,16 +9,16 @@ export const Stopwatch = () => {
     let intervalId;
     if (isRunning) {
       console.log('useEffect, isRunning');
+      setStartMs(Date.now());
       intervalId = setInterval(() => {
-        setMs((ms) => ms + 10);
-        console.log('tick');
-      }, 10);
+        setMs(Date.now() - startMs);
+      }, 25);
     } else {
       clearInterval(intervalId);
     }
 
     return () => clearInterval(intervalId);
-  }, [isRunning]);
+  }, [isRunning, startMs]);
 
   return (
     <div style={{ padding: '32px' }}>
