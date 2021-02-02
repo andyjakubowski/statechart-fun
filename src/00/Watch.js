@@ -10,6 +10,13 @@ const seconds = function seconds(num) {
   return num * 1000;
 };
 const IDLENESS_DELAY = seconds(120);
+const STOPWATCH_INTERVAL = 10;
+const INITIAL_STOPWATCH_CONTEXT = {
+  start: null,
+  elapsedTotal: 0,
+  elapsedSinceStart: 0,
+  lap: 0,
+};
 const CURRENT_YEAR = new Date().getFullYear();
 const incrementByOneSec = function incrementByOneSec(sec) {
   return (sec + 1) % 60;
@@ -226,6 +233,7 @@ const watchMachine = createMachine(
         tenMin: 1,
         hr: 11,
       },
+      stopwatch: INITIAL_STOPWATCH_CONTEXT,
       TICK_INTERVAL: 1000,
     },
     states: {
@@ -235,9 +243,11 @@ const watchMachine = createMachine(
       },
       alive: {
         type: 'parallel',
-        invoke: {
-          src: 'ticker',
-        },
+        invoke: [
+          {
+            src: 'ticker',
+          },
+        ],
         states: {
           'alarm-1-status': {
             initial: 'disabled',
@@ -830,12 +840,14 @@ const watchMachine = createMachine(
                       },
                       zero: {
                         id: 'zero',
+                        entry: ['resetStopwatch'],
                         on: {
                           B_PRESSED: {
                             target: [
                               'displayAndRun.display.regular',
                               'displayAndRun.run.on',
                             ],
+                            actions: ['startStopwatch'],
                           },
                         },
                       },
@@ -851,6 +863,7 @@ const watchMachine = createMachine(
                                       target: 'lap',
                                       in:
                                         '#watch.alive.main.displays.stopwatch.displayAndRun.run.on',
+                                      actions: ['saveStopwatchLap'],
                                     },
                                     {
                                       target: '#zero',
@@ -864,6 +877,7 @@ const watchMachine = createMachine(
                                 on: {
                                   D_PRESSED: {
                                     target: 'regular',
+                                    actions: ['clearStopwatchLap'],
                                   },
                                 },
                               },
@@ -873,9 +887,26 @@ const watchMachine = createMachine(
                             id: 'run',
                             states: {
                               on: {
+                                invoke: {
+                                  src: 'stopwatch',
+                                },
                                 on: {
                                   B_PRESSED: {
                                     target: 'off',
+                                    actions: ['pauseStopwatch'],
+                                  },
+                                  STOPWATCH_TICK: {
+                                    actions: [
+                                      assign({
+                                        stopwatch: ({ stopwatch }) => ({
+                                          ...stopwatch,
+                                          elapsedSinceStart:
+                                            stopwatch.elapsedTotal +
+                                            Date.now() -
+                                            stopwatch.start,
+                                        }),
+                                      }),
+                                    ],
                                   },
                                 },
                               },
@@ -883,6 +914,7 @@ const watchMachine = createMachine(
                                 on: {
                                   B_PRESSED: {
                                     target: 'on',
+                                    actions: ['startStopwatch'],
                                   },
                                 },
                               },
@@ -976,6 +1008,37 @@ const watchMachine = createMachine(
     },
     actions: {
       resetIdlenessTimer: send('RESET_IDLENESS_TIMER', { to: 'idlenessTimer' }),
+      resetStopwatch: assign({
+        stopwatch: INITIAL_STOPWATCH_CONTEXT,
+      }),
+      startStopwatch: assign({
+        stopwatch: ({ stopwatch }) => ({
+          ...stopwatch,
+          start: Date.now(),
+        }),
+      }),
+      pauseStopwatch: assign({
+        stopwatch: ({ stopwatch }) => {
+          const elapsed = stopwatch.elapsedTotal + Date.now() - stopwatch.start;
+          return {
+            ...stopwatch,
+            elapsedTotal: elapsed,
+            elapsedSinceStart: elapsed,
+          };
+        },
+      }),
+      saveStopwatchLap: assign({
+        stopwatch: ({ stopwatch }) => ({
+          ...stopwatch,
+          lap: stopwatch.elapsedTotal + Date.now() - stopwatch.start,
+        }),
+      }),
+      clearStopwatchLap: assign({
+        stopwatch: ({ stopwatch }) => ({
+          ...stopwatch,
+          lap: 0,
+        }),
+      }),
       ...timeIncrementActions,
       ...dateIncrementActions,
     },
@@ -1005,6 +1068,14 @@ const watchMachine = createMachine(
     services: {
       ticker: (context) => (callback) => {
         const id = setInterval(() => callback('TICK'), context.TICK_INTERVAL);
+
+        return () => clearInterval(id);
+      },
+      stopwatch: () => (callback) => {
+        const id = setInterval(
+          () => callback('STOPWATCH_TICK'),
+          STOPWATCH_INTERVAL
+        );
 
         return () => clearInterval(id);
       },
@@ -1061,11 +1132,6 @@ const watchCaseMachine = createMachine(
   }
 );
 
-const faceStyle = {
-  // width: '200px',
-  // height: '170px',
-};
-
 const watchNameStyle = {
   padding: '8px 0',
   fontSize: '17px',
@@ -1120,7 +1186,7 @@ const SmallDisplayAreas = function SmallDisplayAreas() {
 
 export const WatchCase = function WatchCase() {
   const [state, send] = useMachine(watchCaseMachine, {
-    devTools: true,
+    // devTools: true,
   });
   const watchRef = state?.children?.watch;
   const watchEl = watchRef ? <Watch watchRef={watchRef} /> : null;
