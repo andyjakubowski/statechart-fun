@@ -11,3 +11,4 @@
 - [ActionMeta](./07)
 - [CancelableDelay](./08)
 - [Stopwatch](./09)
+- [StopwatchMachine](./10)
