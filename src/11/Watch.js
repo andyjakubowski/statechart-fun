@@ -4,6 +4,17 @@ import { useMachine, useActor } from '@xstate/react';
 import { useKeyDown, useKeyUp } from './extras';
 import { watchCaseMachine } from './watchCaseMachine';
 
+const makeBemClassNamer = function makeBemClassNamer(blockName) {
+  return function bemClassNamer(element, modifier = null) {
+    const elPart = !element ? '' : `__${element}`;
+    const modPart = !modifier ? '' : `_${modifier}`;
+
+    return `${blockName}${elPart}${modPart}`;
+  };
+};
+
+const cn = makeBemClassNamer('Watch');
+
 export const WatchCase = function WatchCase() {
   const [state, send] = useMachine(watchCaseMachine);
   const watchRef = state?.children?.watch;
@@ -38,21 +49,35 @@ const MetaInfo = function MetaInfo({ state }) {
   );
 };
 
-const makeBemClassNamer = function makeBemClassNamer(blockName) {
-  return function bemClassNamer(element, modifier = null) {
-    const elPart = !element ? '' : `__${element}`;
-    const modPart = !modifier ? '' : `_${modifier}`;
+const BeepLabel = function BeepLabel({ state }) {
+  console.log('hey BeepLabel here. state.value:');
+  console.log(state.value);
 
-    return `${blockName}${elPart}${modPart}`;
-  };
+  const beepStates = [
+    'alive.main.displays.regularAndBeep.beep-test.beep',
+    'alive.main.alarms-beep',
+    'alive.chime-status.enabled.beep',
+  ];
+
+  const isBeeping = beepStates.some(state.matches);
+
+  return isBeeping ? 'BEEP' : '';
 };
 
-const cn = makeBemClassNamer('Watch');
+const Face = function Face({ state }) {
+  return '';
+};
 
 const Watch = function Watch({ watchRef }) {
   const [state, send] = useActor(watchRef);
   useKeyDown(send);
   useKeyUp(send);
 
-  return <MetaInfo state={state} />;
+  return (
+    <div>
+      <MetaInfo state={state} />
+      <BeepLabel state={state} />
+      <Face />
+    </div>
+  );
 };

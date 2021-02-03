@@ -209,7 +209,7 @@ const watchMachine = createMachine(
         sec: 55,
         oneMin: 9,
         tenMin: 5,
-        hr: 23,
+        hr: 11,
         mon: 11,
         date: 30,
         day: 0,
