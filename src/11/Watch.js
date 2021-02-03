@@ -3,6 +3,10 @@ import React from 'react';
 import { useMachine, useActor } from '@xstate/react';
 import { useKeyDown, useKeyUp } from './extras';
 import { watchCaseMachine } from './watchCaseMachine';
+import { ReactComponent as AlarmStatusEnabled } from './assets/alarm_enabled.svg';
+import { ReactComponent as AlarmStatusBeeping } from './assets/alarm_beeping.svg';
+import { ReactComponent as ChimeStatusEnabled } from './assets/chime_enabled.svg';
+import { ReactComponent as StopwatchStatusOn } from './assets/stopwatch_on.svg';
 
 const makeBemClassNamer = function makeBemClassNamer(blockName) {
   return function bemClassNamer(element, modifier = null) {
@@ -61,7 +65,7 @@ const BeepLabel = function BeepLabel({ state }) {
   return isBeeping ? 'BEEP' : '';
 };
 
-const AlarmStatus = function AlarmStatus({ state, alarmNumber }) {
+const AlarmStatus = function AlarmStatus({ state, alarmNumber, ...props }) {
   const states = {
     disabled: `alive.alarm-${alarmNumber}-status.disabled`,
     enabled: `alive.alarm-${alarmNumber}-status.enabled`,
@@ -72,25 +76,25 @@ const AlarmStatus = function AlarmStatus({ state, alarmNumber }) {
   };
 
   if (states.beeping.some(state.matches)) {
-    return 'BEEP';
+    return <AlarmStatusBeeping className={props.className} />;
   } else if (state.matches(states.enabled)) {
-    return `AL${alarmNumber}ON`;
+    return <AlarmStatusEnabled className={props.className} />;
   } else if (state.matches(states.disabled)) {
-    return `AL${alarmNumber}OFF`;
+    return '';
   } else {
     return '';
   }
 };
 
-const Alarm1Status = function Alarm1Status({ state }) {
-  return <AlarmStatus alarmNumber="1" state={state} />;
+const Alarm1Status = function Alarm1Status({ state, ...props }) {
+  return <AlarmStatus alarmNumber="1" state={state} {...props} />;
 };
 
-const Alarm2Status = function Alarm2Status({ state }) {
-  return <AlarmStatus alarmNumber="2" state={state} />;
+const Alarm2Status = function Alarm2Status({ state, ...props }) {
+  return <AlarmStatus alarmNumber="2" state={state} {...props} />;
 };
 
-const ChimeStatus = function ChimeStatus({ state }) {
+const ChimeStatus = function ChimeStatus({ state, ...props }) {
   const states = {
     disabled: 'alive.chime-status.disabled',
     enabled: 'alive.chime-status.enabled.quiet',
@@ -100,7 +104,7 @@ const ChimeStatus = function ChimeStatus({ state }) {
   if (state.matches(states.beeping)) {
     return 'BEEP';
   } else if (state.matches(states.enabled)) {
-    return `CHIME-ON`;
+    return <ChimeStatusEnabled className={props.className} />;
   } else if (state.matches(states.disabled)) {
     return `CHIME-OFF`;
   } else {
@@ -108,7 +112,7 @@ const ChimeStatus = function ChimeStatus({ state }) {
   }
 };
 
-const StopwatchStatus = function StopwatchStatus({ context }) {
+const StopwatchStatus = function StopwatchStatus({ context, ...props }) {
   const { start, elapsedTotal, elapsedSinceStart } = context.stopwatch;
   let status;
 
@@ -122,9 +126,9 @@ const StopwatchStatus = function StopwatchStatus({ context }) {
 
   switch (status) {
     case 'onPaused':
-      return 'StopWPaused';
+      return <StopwatchStatusOn className={props.className} />;
     case 'onRunning':
-      return 'StopWRunning';
+      return <StopwatchStatusOn className={props.className} />;
     case 'off':
     default:
       return '';
@@ -134,10 +138,10 @@ const StopwatchStatus = function StopwatchStatus({ context }) {
 const Face = function Face({ state }) {
   return (
     <div>
-      <Alarm1Status state={state} />
-      <Alarm2Status state={state} />
-      <ChimeStatus state={state} />
-      <StopwatchStatus context={state.context} />
+      <Alarm1Status state={state} className={cn('status-icon')} />
+      <Alarm2Status state={state} className={cn('status-icon')} />
+      <ChimeStatus state={state} className={cn('status-icon')} />
+      <StopwatchStatus context={state.context} className={cn('status-icon')} />
     </div>
   );
 };
