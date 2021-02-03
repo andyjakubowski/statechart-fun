@@ -12,3 +12,4 @@
 - [CancelableDelay](./08)
 - [Stopwatch](./09)
 - [StopwatchMachine](./10)
+- [WatchStyled](./11)

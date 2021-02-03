@@ -11,6 +11,7 @@ import { ActionMeta } from './07/ActionMeta';
 import { CancelableDelay } from './08/CancelableDelay';
 import { Stopwatch } from './09/Stopwatch';
 import { StopwatchMachine } from './10/StopwatchMachine';
+import { WatchCase as WatchStyled } from './11/Watch';
 import { ScratchApp } from './scratch';
 import { TableOfContents } from './TableOfContents';
 // import { inspect } from '@xstate/inspect';
@@ -81,6 +82,11 @@ function App() {
         <Route path="/10">
           <Example markdown={getMarkdownLink('10')}>
             <StopwatchMachine />
+          </Example>
+        </Route>
+        <Route path="/11">
+          <Example markdown={getMarkdownLink('11')} backLink={null}>
+            <WatchStyled />
           </Example>
         </Route>
         <Route path="/">
