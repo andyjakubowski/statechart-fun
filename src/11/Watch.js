@@ -50,9 +50,6 @@ const MetaInfo = function MetaInfo({ state }) {
 };
 
 const BeepLabel = function BeepLabel({ state }) {
-  console.log('hey BeepLabel here. state.value:');
-  console.log(state.value);
-
   const beepStates = [
     'alive.main.displays.regularAndBeep.beep-test.beep',
     'alive.main.alarms-beep',
@@ -64,8 +61,85 @@ const BeepLabel = function BeepLabel({ state }) {
   return isBeeping ? 'BEEP' : '';
 };
 
+const AlarmStatus = function AlarmStatus({ state, alarmNumber }) {
+  const states = {
+    disabled: `alive.alarm-${alarmNumber}-status.disabled`,
+    enabled: `alive.alarm-${alarmNumber}-status.enabled`,
+    beeping: [
+      'alive.main.alarms-beep.both-beep',
+      `alive.main.alarms-beep.alarm-${alarmNumber}-beeps`,
+    ],
+  };
+
+  if (states.beeping.some(state.matches)) {
+    return 'BEEP';
+  } else if (state.matches(states.enabled)) {
+    return `AL${alarmNumber}ON`;
+  } else if (state.matches(states.disabled)) {
+    return `AL${alarmNumber}OFF`;
+  } else {
+    return '';
+  }
+};
+
+const Alarm1Status = function Alarm1Status({ state }) {
+  return <AlarmStatus alarmNumber="1" state={state} />;
+};
+
+const Alarm2Status = function Alarm2Status({ state }) {
+  return <AlarmStatus alarmNumber="2" state={state} />;
+};
+
+const ChimeStatus = function ChimeStatus({ state }) {
+  const states = {
+    disabled: 'alive.chime-status.disabled',
+    enabled: 'alive.chime-status.enabled.quiet',
+    beeping: 'alive.chime-status.enabled.beep',
+  };
+
+  if (state.matches(states.beeping)) {
+    return 'BEEP';
+  } else if (state.matches(states.enabled)) {
+    return `CHIME-ON`;
+  } else if (state.matches(states.disabled)) {
+    return `CHIME-OFF`;
+  } else {
+    return '';
+  }
+};
+
+const StopwatchStatus = function StopwatchStatus({ context }) {
+  const { start, elapsedTotal, elapsedSinceStart } = context.stopwatch;
+  let status;
+
+  if (!start) {
+    status = 'off';
+  } else if (elapsedTotal === elapsedSinceStart) {
+    status = 'onPaused';
+  } else {
+    status = 'onRunning';
+  }
+
+  switch (status) {
+    case 'onPaused':
+      return 'StopWPaused';
+    case 'onRunning':
+      return 'StopWRunning';
+    case 'off':
+    default:
+      return '';
+  }
+};
+
 const Face = function Face({ state }) {
-  return '';
+  return (
+    <div>
+      <Alarm1Status state={state} />
+      <Alarm2Status state={state} />
+      <ChimeStatus state={state} />
+      <StopwatchStatus context={state.context} />
+    </div>
+  );
 };
 
 const Watch = function Watch({ watchRef }) {
@@ -77,7 +151,7 @@ const Watch = function Watch({ watchRef }) {
     <div>
       <MetaInfo state={state} />
       <BeepLabel state={state} />
-      <Face />
+      <Face state={state} />
     </div>
   );
 };
