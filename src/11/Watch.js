@@ -76,9 +76,9 @@ const AlarmStatus = function AlarmStatus({ state, alarmNumber, ...props }) {
   };
 
   if (states.beeping.some(state.matches)) {
-    return <AlarmStatusBeeping className={props.className} />;
+    return <AlarmStatusBeeping data-state="beeping" {...props} />;
   } else if (state.matches(states.enabled)) {
-    return <AlarmStatusEnabled className={props.className} />;
+    return <AlarmStatusEnabled data-state="enabled" {...props} />;
   } else if (state.matches(states.disabled)) {
     return '';
   } else {
@@ -102,9 +102,9 @@ const ChimeStatus = function ChimeStatus({ state, ...props }) {
   };
 
   if (state.matches(states.beeping)) {
-    return 'BEEP';
+    return <ChimeStatusEnabled data-state="beeping" {...props} />;
   } else if (state.matches(states.enabled)) {
-    return <ChimeStatusEnabled className={props.className} />;
+    return <ChimeStatusEnabled data-state="enabled" {...props} />;
   } else if (state.matches(states.disabled)) {
     return `CHIME-OFF`;
   } else {
@@ -114,21 +114,21 @@ const ChimeStatus = function ChimeStatus({ state, ...props }) {
 
 const StopwatchStatus = function StopwatchStatus({ context, ...props }) {
   const { start, elapsedTotal, elapsedSinceStart } = context.stopwatch;
-  let status;
+  let state;
 
   if (!start) {
-    status = 'off';
+    state = 'off';
   } else if (elapsedTotal === elapsedSinceStart) {
-    status = 'onPaused';
+    state = 'onPaused';
   } else {
-    status = 'onRunning';
+    state = 'onRunning';
   }
 
-  switch (status) {
+  switch (state) {
     case 'onPaused':
-      return <StopwatchStatusOn className={props.className} />;
+      return <StopwatchStatusOn data-state={state} {...props} />;
     case 'onRunning':
-      return <StopwatchStatusOn className={props.className} />;
+      return <StopwatchStatusOn data-state={state} {...props} />;
     case 'off':
     default:
       return '';

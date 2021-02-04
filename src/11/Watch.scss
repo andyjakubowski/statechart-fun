@@ -6,5 +6,25 @@
 
   &__status-icon {
     width: 100px;
+
+    &[data-state='beeping'],
+    &[data-state='onRunning'] {
+      animation: blink 0.6s infinite alternate;
+    }
+  }
+}
+
+@keyframes blink {
+  0%,
+  45.8333333% {
+    opacity: 0;
+  }
+
+  54.1666666% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
