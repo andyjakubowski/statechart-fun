@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Digital Dismay';
+  src: url('assets/DigitalDismay-VAKw.ttf');
+}
+
 .Watch {
   &__meta {
     font-size: 10px;
@@ -10,6 +15,16 @@
     &[data-state='beeping'],
     &[data-state='onRunning'] {
       animation: blink 0.6s infinite alternate;
+    }
+  }
+
+  &__display {
+    font-family: 'Digital Dismay', sans-serif;
+    font-size: 65px;
+
+    &-seconds {
+      font-size: 40px;
+      margin: 15px;
     }
   }
 }

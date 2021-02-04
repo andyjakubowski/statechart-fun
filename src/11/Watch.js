@@ -40,6 +40,19 @@ const Face = function Face({ state }) {
   return (
     <div>
       <StatusIcons state={state} />
+      <Display state={state} />
+    </div>
+  );
+};
+
+const Display = function Display({ state }) {
+  const { sec, oneMin, tenMin, hr } = state.context.T;
+
+  return (
+    <div className={cn('display')}>
+      {hr}:{tenMin}
+      {oneMin}
+      <span className={cn('display-seconds')}>{sec}</span>
     </div>
   );
 };
