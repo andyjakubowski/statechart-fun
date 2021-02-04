@@ -1,12 +1,7 @@
 import React from 'react';
 import cn from './classNames';
 
-const Regular = function Regular({ state }) {
-  const states = {
-    time: 'alive.main.displays.regularAndBeep.regular.time',
-    date: 'alive.main.displays.regular.date',
-    update: 'alive.main.displays.stopwatch',
-  };
+const TimeDisplay = function TimeDisplay({ state }) {
   const { sec, oneMin, tenMin, hr } = state.context.T;
 
   return (
@@ -16,6 +11,37 @@ const Regular = function Regular({ state }) {
       <span className={cn('display-seconds')}>{sec}</span>
     </div>
   );
+};
+
+const DateDisplay = function DateDisplay({ state }) {
+  const { mon, date, day, year, mode } = state.context.T;
+  const dateString = `${mon} ${date} ${day} ${year}`;
+
+  return <div className={cn('display')}>{dateString}</div>;
+};
+
+const UpdateDisplay = function UpdateDisplay({ state }) {
+  return 'UpdateDisplay';
+};
+
+const Regular = function Regular({ state }) {
+  const states = {
+    time: 'alive.main.displays.regularAndBeep.regular.time',
+    date: 'alive.main.displays.regularAndBeep.regular.date',
+    update: 'alive.main.displays.regularAndBeep.regular.update',
+  };
+
+  const currentState = Object.keys(states).find((key) =>
+    state.matches(states[key])
+  );
+
+  const displays = {
+    time: <TimeDisplay state={state} />,
+    date: <DateDisplay state={state} />,
+    update: <UpdateDisplay state={state} />,
+  };
+
+  return displays[currentState] || displays.time;
 };
 
 const Out = function Out() {
@@ -46,12 +72,11 @@ const Display = function Display({ state }) {
 
   const displays = {
     regular: <Displays.Regular state={state} />,
-    wait: <Displays.Regular state={state} />,
     out: <Displays.Out state={state} />,
     stopwatch: <Displays.Stopwatch state={state} />,
   };
 
-  return displays[currentState];
+  return displays[currentState] || displays.regular;
 };
 
 export default Display;
