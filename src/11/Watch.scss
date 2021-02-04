@@ -22,10 +22,14 @@
     font-family: 'Digital Dismay', sans-serif;
     font-size: 65px;
 
-    &-seconds {
+    &-small {
       font-size: 40px;
       margin: 15px;
     }
+  }
+
+  &_blinking {
+    animation: blink 0.6s infinite alternate;
   }
 }
 

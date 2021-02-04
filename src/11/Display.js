@@ -8,20 +8,99 @@ const TimeDisplay = function TimeDisplay({ state }) {
     <div className={cn('display')}>
       {hr}:{tenMin}
       {oneMin}
-      <span className={cn('display-seconds')}>{sec}</span>
+      <span className={cn('display-small')}>{sec}</span>
     </div>
   );
 };
 
 const DateDisplay = function DateDisplay({ state }) {
-  const { mon, date, day, year, mode } = state.context.T;
-  const dateString = `${mon} ${date} ${day} ${year}`;
+  const { mon, date, day } = state.context.T;
+  const days = ['Mo', 'Tu', 'We', 'Th', 'fr', 'sa', 'su'];
 
-  return <div className={cn('display')}>{dateString}</div>;
+  return (
+    <div className={cn('display')}>
+      {`${mon + 1}.${date + 1}`}
+      <span className={cn('display-small')}>{days[day]}</span>
+    </div>
+  );
+};
+
+const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
+  const { sec, oneMin, tenMin, hr } = state.context.T;
+  const classNames = ['sec', '1min', '10min', 'hr'].reduce((result, el) => {
+    result[el] = el === updateState ? cn(null, 'blinking') : undefined;
+    return result;
+  }, {});
+  return (
+    <div className={cn('display')}>
+      <span className={classNames.hr}>{hr}</span>:
+      <span className={classNames['10min']}>{tenMin}</span>
+      <span className={classNames['1min']}>{oneMin}</span>
+      <span className={[classNames['sec'], cn('display-small')].join(' ')}>
+        {sec}
+      </span>
+    </div>
+  );
+};
+const DateUpdateDisplay = function DateUpdateDisplay({ state, updateState }) {
+  const { mon, date, day } = state.context.T;
+  const days = ['Mo', 'Tu', 'We', 'Th', 'fr', 'sa', 'su'];
+  const classNames = ['mon', 'date', 'day'].reduce((result, el) => {
+    result[el] = el === updateState ? cn(null, 'blinking') : undefined;
+    return result;
+  }, {});
+  return (
+    <div className={cn('display')}>
+      <span className={classNames.mon}>{mon + 1}</span>.
+      <span className={classNames.date}>{date + 1}</span>
+      <span className={[classNames.day, cn('display-small')].join(' ')}>
+        {days[day]}
+      </span>
+    </div>
+  );
+};
+const YearUpdateDisplay = function YearUpdateDisplay({ state, updateState }) {
+  return <div>YearUpdateDisplay: {updateState}</div>;
+};
+const ModeUpdateDisplay = function ModeUpdateDisplay({ state, updateState }) {
+  return <div>ModeUpdateDisplay: {updateState}</div>;
 };
 
 const UpdateDisplay = function UpdateDisplay({ state }) {
-  return 'UpdateDisplay';
+  const states = [
+    'sec',
+    '1min',
+    '10min',
+    'hr',
+    'mon',
+    'date',
+    'day',
+    'year',
+    'mode',
+  ].reduce((result, key) => {
+    result[key] = `alive.main.displays.regularAndBeep.regular.update.${key}`;
+    return result;
+  }, {});
+  const updateTypes = {
+    time: ['sec', '1min', '10min', 'hr'],
+    date: ['mon', 'date', 'day'],
+    year: ['year'],
+    mode: ['mode'],
+  };
+  const currentState = Object.keys(states).find((key) =>
+    state.matches(states[key])
+  );
+  const currentUpdateType = Object.keys(updateTypes).find((key) =>
+    updateTypes[key].includes(currentState)
+  );
+  const displays = {
+    time: <TimeUpdateDisplay state={state} updateState={currentState} />,
+    date: <DateUpdateDisplay state={state} updateState={currentState} />,
+    year: <YearUpdateDisplay state={state} updateState={currentState} />,
+    mode: <ModeUpdateDisplay state={state} updateState={currentState} />,
+  };
+
+  return displays[currentUpdateType];
 };
 
 const Alarm1Display = function Alarm1Display({ state }) {
