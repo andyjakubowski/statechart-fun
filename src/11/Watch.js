@@ -45,14 +45,42 @@ const Face = function Face({ state }) {
   );
 };
 
-const Display = function Display({ state }) {
-  const { sec, oneMin, tenMin, hr } = state.context.T;
+const Displays = {
+  Regular: function Regular({ state }) {
+    const { sec, oneMin, tenMin, hr } = state.context.T;
 
-  return (
-    <div className={cn('display')}>
-      {hr}:{tenMin}
-      {oneMin}
-      <span className={cn('display-seconds')}>{sec}</span>
-    </div>
+    return (
+      <div className={cn('display')}>
+        {hr}:{tenMin}
+        {oneMin}
+        <span className={cn('display-seconds')}>{sec}</span>
+      </div>
+    );
+  },
+  Out: function Out() {
+    return <div>out</div>;
+  },
+  Stopwatch: function Stopwatch() {
+    return <div>stopwatch</div>;
+  },
+};
+
+const Display = function Display({ state }) {
+  const states = {
+    regular: 'alive.main.displays.regularAndBeep.regular',
+    out: 'alive.main.displays.out',
+    stopwatch: 'alive.main.displays.stopwatch',
+  };
+
+  const currentState = Object.keys(states).find((key) =>
+    state.matches(states[key])
   );
+
+  const displays = {
+    regular: <Displays.Regular state={state} />,
+    out: <Displays.Out state={state} />,
+    stopwatch: <Displays.Stopwatch state={state} />,
+  };
+
+  return displays[currentState];
 };
