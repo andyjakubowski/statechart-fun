@@ -12,7 +12,7 @@
   &__status-icon {
     width: 100px;
 
-    &[data-state='beeping'],
+    &[data-state='blinking'],
     &[data-state='onRunning'] {
       animation: blink 0.6s infinite alternate;
     }
