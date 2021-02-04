@@ -12,7 +12,7 @@ const INITIAL_STOPWATCH_CONTEXT = {
   elapsedSinceStart: 0,
   lap: 0,
 };
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = 1979;
 const incrementByOneSec = function incrementByOneSec(sec) {
   return (sec + 1) % 60;
 };
@@ -38,7 +38,7 @@ const incrementDay = function incrementDay(day) {
   return (day + 1) % 7;
 };
 const incrementYear = function incrementYear(year) {
-  return (year + 1) % (CURRENT_YEAR + 100);
+  return (year + 1) % (CURRENT_YEAR + 30);
 };
 
 const daysInMonth = function daysInMonth(monthIndex) {
