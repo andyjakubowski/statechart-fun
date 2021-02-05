@@ -12,7 +12,9 @@ const INITIAL_STOPWATCH_CONTEXT = {
   elapsedSinceStart: 0,
   lap: 0,
 };
-const CURRENT_YEAR = 1979;
+const MIN_YEAR = 1979;
+const MAX_YEAR = 2009;
+const INITIAL_YEAR = MIN_YEAR;
 const incrementByOneSec = function incrementByOneSec(sec) {
   return (sec + 1) % 60;
 };
@@ -38,7 +40,10 @@ const incrementDay = function incrementDay(day) {
   return (day + 1) % 7;
 };
 const incrementYear = function incrementYear(year) {
-  return (year + 1) % (CURRENT_YEAR + 30);
+  const incremented = year + 1;
+  return (
+    MIN_YEAR + (Math.max(0, incremented - MIN_YEAR) % (MAX_YEAR - MIN_YEAR + 1))
+  );
 };
 
 const daysInMonth = function daysInMonth(monthIndex) {
@@ -213,7 +218,7 @@ const watchMachine = createMachine(
         mon: 11,
         date: 30,
         day: 0,
-        year: CURRENT_YEAR,
+        year: INITIAL_YEAR,
         mode: '24h',
       },
       T1: {
