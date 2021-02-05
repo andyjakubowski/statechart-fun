@@ -8,8 +8,8 @@ const IDLENESS_DELAY = seconds(120);
 const STOPWATCH_INTERVAL = 10;
 const INITIAL_STOPWATCH_CONTEXT = {
   start: null,
+  elapsedBeforeStart: 0,
   elapsedTotal: 0,
-  elapsedSinceStart: 0,
   lap: 0,
 };
 const MIN_YEAR = 1979;
@@ -900,8 +900,8 @@ const watchMachine = createMachine(
                                       assign({
                                         stopwatch: ({ stopwatch }) => ({
                                           ...stopwatch,
-                                          elapsedSinceStart:
-                                            stopwatch.elapsedTotal +
+                                          elapsedTotal:
+                                            stopwatch.elapsedBeforeStart +
                                             Date.now() -
                                             stopwatch.start,
                                         }),
@@ -1019,18 +1019,19 @@ const watchMachine = createMachine(
       }),
       pauseStopwatch: assign({
         stopwatch: ({ stopwatch }) => {
-          const elapsed = stopwatch.elapsedTotal + Date.now() - stopwatch.start;
+          const elapsed =
+            stopwatch.elapsedBeforeStart + Date.now() - stopwatch.start;
           return {
             ...stopwatch,
+            elapsedBeforeStart: elapsed,
             elapsedTotal: elapsed,
-            elapsedSinceStart: elapsed,
           };
         },
       }),
       saveStopwatchLap: assign({
         stopwatch: ({ stopwatch }) => ({
           ...stopwatch,
-          lap: stopwatch.elapsedTotal + Date.now() - stopwatch.start,
+          lap: stopwatch.elapsedBeforeStart + Date.now() - stopwatch.start,
         }),
       }),
       clearStopwatchLap: assign({

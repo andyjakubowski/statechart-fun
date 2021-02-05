@@ -67,8 +67,8 @@ const ChimeStatus = function ChimeStatus({ state, ...props }) {
 };
 
 const StopwatchStatus = function StopwatchStatus({ state, ...props }) {
-  const { start, elapsedTotal, elapsedSinceStart } = state.context.stopwatch;
-  const isPaused = elapsedTotal === elapsedSinceStart;
+  const { start, elapsedBeforeStart, elapsedTotal } = state.context.stopwatch;
+  const isPaused = elapsedBeforeStart === elapsedTotal;
   const isRunning = !!start && !isPaused;
   const iconStates = {
     blinking: 'alive.main.displays.stopwatch',

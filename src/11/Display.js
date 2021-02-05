@@ -303,8 +303,41 @@ const Out = function Out({ state }) {
   return displays[currentState] || displays.time;
 };
 
-const Stopwatch = function Stopwatch() {
-  return <div>stopwatch</div>;
+const getTimesFromMs = (function makeGetTimesFromMs() {
+  const MS_PER_SECOND = 1000;
+  const SECONDS_PER_MINUTE = 60;
+  const MS_PER_MINUTE = MS_PER_SECOND * SECONDS_PER_MINUTE;
+  const MS_PER_ONE_HUNDRETH_OF_SEC = 10;
+  return function getTimesFromMs(ms) {
+    const min = Math.floor(ms / MS_PER_MINUTE);
+    let remainingMs = ms % MS_PER_MINUTE;
+    const sec = Math.floor(remainingMs / MS_PER_SECOND);
+    remainingMs = remainingMs % MS_PER_SECOND;
+    const hundrethsOfSec = Math.floor(remainingMs / MS_PER_ONE_HUNDRETH_OF_SEC);
+    return { min, sec, hundrethsOfSec };
+  };
+})();
+
+const Stopwatch = function Stopwatch({ state }) {
+  const { elapsedTotal, lap } = state.context.stopwatch;
+  const states = {
+    regular: 'alive.main.displays.stopwatch.displayAndRun.display.regular',
+    lap: 'alive.main.displays.stopwatch.displayAndRun.display.lap',
+  };
+  const currentState = Object.keys(states).find((key) =>
+    state.matches(states[key])
+  );
+  const shownTime = currentState === 'regular' ? elapsedTotal : lap;
+  const { min, sec, hundrethsOfSec } = getTimesFromMs(shownTime);
+  return (
+    <LCD>
+      <Digits1>{min}</Digits1>
+      <Primes />
+      <Colon />
+      <Digits2>{sec}</Digits2>
+      <Digits3>{hundrethsOfSec}</Digits3>
+    </LCD>
+  );
 };
 
 const Displays = {
