@@ -54,6 +54,7 @@ const LCD = function LCD({ children }) {
 
 const TimeDisplay = function TimeDisplay({ state }) {
   const { sec, oneMin, tenMin, hr } = state.context.T;
+  const secString = String(sec).padStart(2, '0');
 
   return (
     <LCD>
@@ -63,7 +64,7 @@ const TimeDisplay = function TimeDisplay({ state }) {
         {tenMin}
         {oneMin}
       </Digits2>
-      <Digits3>{sec}</Digits3>
+      <Digits3>{secString}</Digits3>
     </LCD>
   );
 };
@@ -88,6 +89,7 @@ const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
     result[el] = el === updateState ? cn(null, 'blinking') : undefined;
     return result;
   }, {});
+  const secString = String(sec).padStart(2, '0');
   return (
     <LCD>
       <Digits1>
@@ -99,7 +101,7 @@ const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
         <span className={classNames['1min']}>{oneMin}</span>
       </Digits2>
       <Digits3>
-        <span className={classNames['sec']}>{sec}</span>
+        <span className={classNames['sec']}>{secString}</span>
       </Digits3>
     </LCD>
   );
@@ -329,13 +331,17 @@ const Stopwatch = function Stopwatch({ state }) {
   );
   const shownTime = currentState === 'regular' ? elapsedTotal : lap;
   const { min, sec, hundrethsOfSec } = getTimesFromMs(shownTime);
+  const minString = String(min).padStart(2, '0');
+  const secString = String(sec).padStart(2, '0');
+  const hundrethsOfSecString = String(hundrethsOfSec).padStart(2, '0');
+
   return (
     <LCD>
-      <Digits1>{min}</Digits1>
+      <Digits1>{minString}</Digits1>
       <Primes />
       <Colon />
-      <Digits2>{sec}</Digits2>
-      <Digits3>{hundrethsOfSec}</Digits3>
+      <Digits2>{secString}</Digits2>
+      <Digits3>{hundrethsOfSecString}</Digits3>
     </LCD>
   );
 };
