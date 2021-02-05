@@ -52,19 +52,49 @@ const LCD = function LCD({ children }) {
   return <div className={cn('display')}>{children}</div>;
 };
 
+const formatHr = function formatHr(mode, hr) {
+  if (mode === '24h') {
+    return hr;
+  }
+
+  const num = hr % 12;
+  if (num === 0) {
+    return 12;
+  } else {
+    return num;
+  }
+};
+
+const getPeriodIndicator = (function makeGetPeriodIndicator() {
+  const isPM = function isPM(hr) {
+    return Math.floor(hr / 12) >= 1;
+  };
+
+  return function getPeriodIndicator(mode, hr) {
+    if (mode === '24h') {
+      return undefined;
+    }
+
+    return isPM(hr) ? <PM /> : <AM />;
+  };
+})();
+
 const TimeDisplay = function TimeDisplay({ state }) {
-  const { sec, oneMin, tenMin, hr } = state.context.T;
-  const secString = String(sec).padStart(2, '0');
+  const { sec, oneMin, tenMin, hr, mode } = state.context.T;
+  const formattedSec = String(sec).padStart(2, '0');
+  const formattedHr = formatHr(mode, hr);
+  const PeriodIndicator = getPeriodIndicator(mode, hr);
 
   return (
     <LCD>
-      <Digits1>{hr}</Digits1>
+      <Digits1>{formattedHr}</Digits1>
       <Colon />
       <Digits2>
         {tenMin}
         {oneMin}
       </Digits2>
-      <Digits3>{secString}</Digits3>
+      {PeriodIndicator}
+      <Digits3>{formattedSec}</Digits3>
     </LCD>
   );
 };
@@ -84,24 +114,27 @@ const DateDisplay = function DateDisplay({ state }) {
 };
 
 const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
-  const { sec, oneMin, tenMin, hr } = state.context.T;
+  const { sec, oneMin, tenMin, hr, mode } = state.context.T;
   const classNames = ['sec', '1min', '10min', 'hr'].reduce((result, el) => {
     result[el] = el === updateState ? cn(null, 'blinking') : undefined;
     return result;
   }, {});
-  const secString = String(sec).padStart(2, '0');
+  const formattedHr = formatHr(mode, hr);
+  const PeriodIndicator = getPeriodIndicator(mode, hr);
+  const formattedSec = String(sec).padStart(2, '0');
   return (
     <LCD>
       <Digits1>
-        <span className={classNames.hr}>{hr}</span>
+        <span className={classNames.hr}>{formattedHr}</span>
       </Digits1>
       <Colon />
       <Digits2>
         <span className={classNames['10min']}>{tenMin}</span>
         <span className={classNames['1min']}>{oneMin}</span>
       </Digits2>
+      {PeriodIndicator}
       <Digits3>
-        <span className={classNames['sec']}>{secString}</span>
+        <span className={classNames['sec']}>{formattedSec}</span>
       </Digits3>
     </LCD>
   );
@@ -196,6 +229,7 @@ const UpdateDisplay = function UpdateDisplay({ state }) {
 };
 
 const AlarmDisplay = function AlarmDisplay({ state, alarmNumber }) {
+  const { mode } = state.context.T;
   const { oneMin, tenMin, hr } = state.context[`T${alarmNumber}`];
   const states = {
     '1min': `alive.main.displays.out.update-${alarmNumber}.1min`,
@@ -212,17 +246,20 @@ const AlarmDisplay = function AlarmDisplay({ state, alarmNumber }) {
     result[el] = el === currentState ? cn(null, 'blinking') : undefined;
     return result;
   }, {});
+  const formattedHr = formatHr(mode, hr);
+  const PeriodIndicator = getPeriodIndicator(mode, hr);
 
   return (
     <LCD>
       <Digits1>
-        <span className={classNames.hr}>{hr}</span>
+        <span className={classNames.hr}>{formattedHr}</span>
       </Digits1>
       <Colon />
       <Digits2>
         <span className={classNames['10min']}>{tenMin}</span>
         <span className={classNames['1min']}>{oneMin}</span>
       </Digits2>
+      {PeriodIndicator}
       <Digits3>
         <span className={classNames['on'] || classNames['off']}>
           {statusLabel}
@@ -332,7 +369,7 @@ const Stopwatch = function Stopwatch({ state }) {
   const shownTime = currentState === 'regular' ? elapsedTotal : lap;
   const { min, sec, hundrethsOfSec } = getTimesFromMs(shownTime);
   const minString = String(min).padStart(2, '0');
-  const secString = String(sec).padStart(2, '0');
+  const formattedSec = String(sec).padStart(2, '0');
   const hundrethsOfSecString = String(hundrethsOfSec).padStart(2, '0');
 
   return (
@@ -340,7 +377,7 @@ const Stopwatch = function Stopwatch({ state }) {
       <Digits1>{minString}</Digits1>
       <Primes />
       <Colon />
-      <Digits2>{secString}</Digits2>
+      <Digits2>{formattedSec}</Digits2>
       <Digits3>{hundrethsOfSecString}</Digits3>
     </LCD>
   );
