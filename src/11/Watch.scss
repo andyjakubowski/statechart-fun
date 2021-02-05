@@ -9,8 +9,39 @@
     background-color: hsla(0, 0%, 0%, 0.16);
   }
 
-  &__status-icon {
-    width: 100px;
+  &__face {
+    display: grid;
+    grid-template-columns: [start] 57px [display-start] 206px [display-end] 57px [end];
+    grid-template-rows: [start] 104px [display-start] 96px [display-end] 86px [end];
+    background: no-repeat url('assets/face.svg');
+  }
+
+  &__displays {
+    grid-column: display-start / display-end;
+    grid-row: display-start / display-end;
+
+    display: grid;
+    grid-template-columns:
+      [lcd-start]
+      16px
+      [alarm1-start] 41px [alarm1-end]
+      11px
+      [alarm2-start] 40px [alarm2-end]
+      12px
+      [chime-start] 28px [chime-end]
+      11px
+      [stopwatch-start] 41px [stopwatch-end]
+      6px
+      [lcd-end];
+    grid-template-rows: 3px [icons-start] 30px [icons-end] 3px [lcd-start] 60px [lcd-end];
+    align-items: center;
+  }
+
+  &__alarm1-icon,
+  &__alarm2-icon,
+  &__chime-icon,
+  &__stopwatch-icon {
+    grid-row: icons-start / icons-end;
 
     &[data-state='blinking'],
     &[data-state='onRunning'] {
@@ -18,18 +49,110 @@
     }
   }
 
-  &__display {
-    font-family: 'Digital Dismay', sans-serif;
-    font-size: 65px;
+  &__alarm1-icon {
+    grid-column: alarm1-start / alarm1-end;
+  }
 
-    &-small {
-      font-size: 40px;
-      margin: 15px;
-    }
+  &__alarm2-icon {
+    grid-column: alarm2-start / alarm2-end;
+  }
+
+  &__chime-icon {
+    grid-column: chime-start / chime-end;
+  }
+
+  &__stopwatch-icon {
+    grid-column: stopwatch-start / stopwatch-end;
+  }
+
+  &__display {
+    grid-column: lcd-start / lcd-end;
+    grid-row: lcd-start / lcd-end;
+
+    display: grid;
+    grid-template-columns:
+      9px
+      [digits1-start] 63px [digits1-end
+      prime-start colon-start period-start] 13px [prime-end colon-end period-end
+      digits2-start] 63px [digits2-end
+      double-prime-start] 5px [double-prime-end
+      am-start pm-start digits3-start] 46px [am-end pm-end]
+      7px [digits3-end];
+    grid-template-rows:
+      5px
+      [primes-start] 4px
+      [digits1-start digits2-start am-start pm-start] 13px [primes-end am-end pm-end
+      colon-start period-start digits3-start] 32px [colon-end period-end digits1-end digits2-end digits3-end]
+      6px;
+  }
+
+  &__colon-icon {
+    grid-column: colon-start / colon-end;
+    grid-row: colon-start / colon-end;
+  }
+
+  &__period-icon {
+    grid-column: period-start / period-end;
+    grid-row: period-start / period-end;
+    align-self: end;
+  }
+
+  &__prime-icon {
+    grid-column: prime-start / prime-end;
+    grid-row: primes-start / primes-end;
+  }
+
+  &__double-prime-icon {
+    grid-column: double-prime-start / double-prime-end;
+    grid-row: primes-start / primes-end;
+  }
+
+  &__am-icon {
+    grid-column: am-start / am-end;
+    grid-row: am-start / am-end;
+  }
+
+  &__pm-icon {
+    grid-column: pm-start / pm-end;
+    grid-row: pm-start / pm-end;
+    justify-self: end;
+  }
+
+  &__digits1,
+  &__digits2,
+  &__digits3 {
+    font-family: 'Digital Dismay', sans-serif;
+    line-height: 0.64;
+    letter-spacing: 2.94px;
+    align-self: end;
+    text-align: right;
+  }
+
+  &__digits1,
+  &__digits2 {
+    font-size: 66px;
+  }
+
+  &__digits1 {
+    grid-column: digits1-start / digits1-end;
+    grid-row: digits1-start / digits1-end;
+  }
+
+  &__digits2 {
+    grid-column: digits2-start / digits2-end;
+    grid-row: digits2-start / digits2-end;
+  }
+
+  &__digits3 {
+    padding-right: 3px;
+    font-size: 42px;
+    grid-column: digits3-start / digits3-end;
+    grid-row: digits3-start / digits3-end;
+    justify-self: end;
   }
 
   &_blinking {
-    animation: blink 0.6s infinite alternate;
+    animation: blink 0.6s infinite alternate 0.0001s;
   }
 }
 

@@ -39,9 +39,11 @@ const Watch = function Watch({ watchRef }) {
 
 const Face = function Face({ state }) {
   return (
-    <div>
-      <StatusIcons state={state} />
-      <Display state={state} />
+    <div className={cn('face')}>
+      <div className={cn('displays')}>
+        <StatusIcons state={state} />
+        <Display state={state} />
+      </div>
     </div>
   );
 };

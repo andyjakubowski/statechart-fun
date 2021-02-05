@@ -1,15 +1,70 @@
 import React from 'react';
 import cn from './classNames';
+import colon from './assets/colon.svg';
+import period from './assets/period.svg';
+import prime from './assets/prime.svg';
+import doublePrime from './assets/double_prime.svg';
+import am from './assets/am.svg';
+import pm from './assets/pm.svg';
+
+const Colon = function Colon() {
+  return <img className={cn('colon-icon')} src={colon} alt="Colon" />;
+};
+
+const Primes = function Primes() {
+  return (
+    <>
+      <img className={cn('prime-icon')} src={prime} alt="Prime" />
+      <img
+        className={cn('double-prime-icon')}
+        src={doublePrime}
+        alt="Double prime"
+      />
+    </>
+  );
+};
+
+const Period = function Period() {
+  return <img className={cn('period-icon')} src={period} alt="Period" />;
+};
+
+const AM = function AM() {
+  return <img className={cn('am-icon')} src={am} alt="AM symbol" />;
+};
+
+const PM = function PM() {
+  return <img className={cn('pm-icon')} src={pm} alt="PM symbol" />;
+};
+
+const Digits1 = function Digits1({ children }) {
+  return <div className={cn('digits1')}>{children}</div>;
+};
+
+const Digits2 = function Digits2({ children }) {
+  return <div className={cn('digits2')}>{children}</div>;
+};
+
+const Digits3 = function Digits3({ children }) {
+  return <div className={cn('digits3')}>{children}</div>;
+};
+
+const LCD = function LCD({ children }) {
+  return <div className={cn('display')}>{children}</div>;
+};
 
 const TimeDisplay = function TimeDisplay({ state }) {
   const { sec, oneMin, tenMin, hr } = state.context.T;
 
   return (
-    <div className={cn('display')}>
-      {hr}:{tenMin}
-      {oneMin}
-      <span className={cn('display-small')}>{sec}</span>
-    </div>
+    <LCD>
+      <Digits1>{hr}</Digits1>
+      <Colon />
+      <Digits2>
+        {tenMin}
+        {oneMin}
+      </Digits2>
+      <Digits3>{sec}</Digits3>
+    </LCD>
   );
 };
 
@@ -18,10 +73,12 @@ const DateDisplay = function DateDisplay({ state }) {
   const days = ['Mo', 'Tu', 'We', 'Th', 'fr', 'sa', 'su'];
 
   return (
-    <div className={cn('display')}>
-      {`${mon + 1}.${date + 1}`}
-      <span className={cn('display-small')}>{days[day]}</span>
-    </div>
+    <LCD>
+      <Digits1>{mon + 1}</Digits1>
+      <Period />
+      <Digits2>{date + 1}</Digits2>
+      <Digits3>{days[day]}</Digits3>
+    </LCD>
   );
 };
 
@@ -32,16 +89,22 @@ const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
     return result;
   }, {});
   return (
-    <div className={cn('display')}>
-      <span className={classNames.hr}>{hr}</span>:
-      <span className={classNames['10min']}>{tenMin}</span>
-      <span className={classNames['1min']}>{oneMin}</span>
-      <span className={[classNames['sec'], cn('display-small')].join(' ')}>
-        {sec}
-      </span>
-    </div>
+    <LCD>
+      <Digits1>
+        <span className={classNames.hr}>{hr}</span>
+      </Digits1>
+      <Colon />
+      <Digits2>
+        <span className={classNames['10min']}>{tenMin}</span>
+        <span className={classNames['1min']}>{oneMin}</span>
+      </Digits2>
+      <Digits3>
+        <span className={classNames['sec']}>{sec}</span>
+      </Digits3>
+    </LCD>
   );
 };
+
 const DateUpdateDisplay = function DateUpdateDisplay({ state, updateState }) {
   const { mon, date, day } = state.context.T;
   const days = ['Mo', 'Tu', 'We', 'Th', 'fr', 'sa', 'su'];
@@ -50,20 +113,47 @@ const DateUpdateDisplay = function DateUpdateDisplay({ state, updateState }) {
     return result;
   }, {});
   return (
-    <div className={cn('display')}>
-      <span className={classNames.mon}>{mon + 1}</span>.
-      <span className={classNames.date}>{date + 1}</span>
-      <span className={[classNames.day, cn('display-small')].join(' ')}>
-        {days[day]}
-      </span>
-    </div>
+    <LCD>
+      <Digits1>
+        <span className={classNames.mon}>{mon + 1}</span>
+      </Digits1>
+      <Period />
+      <Digits2>
+        <span className={classNames.date}>{date + 1}</span>
+      </Digits2>
+      <Digits3>
+        <span className={classNames.day}>{days[day]}</span>
+      </Digits3>
+    </LCD>
   );
 };
 const YearUpdateDisplay = function YearUpdateDisplay({ state, updateState }) {
-  return <div>YearUpdateDisplay: {updateState}</div>;
+  const yearString = String(state.context.T.year);
+  const firstTwoDigits = yearString.slice(0, 2);
+  const lastTwoDigits = yearString.slice(2);
+  return (
+    <LCD>
+      <Digits2>
+        <span className={cn(null, 'blinking')}>{firstTwoDigits}</span>
+      </Digits2>
+      <Digits3>
+        <span className={cn(null, 'blinking')}>{lastTwoDigits}</span>
+      </Digits3>
+    </LCD>
+  );
 };
 const ModeUpdateDisplay = function ModeUpdateDisplay({ state, updateState }) {
-  return <div>ModeUpdateDisplay: {updateState}</div>;
+  const { mode } = state.context.T;
+  const modeDigits = mode === '12h' ? '12' : '24';
+
+  return (
+    <LCD>
+      <Digits1>
+        <span className={cn(null, 'blinking')}>{modeDigits}</span>
+      </Digits1>
+      <Digits2>h</Digits2>
+    </LCD>
+  );
 };
 
 const UpdateDisplay = function UpdateDisplay({ state }) {
@@ -103,68 +193,70 @@ const UpdateDisplay = function UpdateDisplay({ state }) {
   return displays[currentUpdateType];
 };
 
-const Alarm1Display = function Alarm1Display({ state }) {
-  const { oneMin, tenMin, hr } = state.context.T1;
-
-  return (
-    <div className={cn('display')}>
-      {hr}:{tenMin}
-      {oneMin}
-    </div>
-  );
-};
-
-const Alarm2Display = function Alarm2Display({ state }) {
-  const { oneMin, tenMin, hr } = state.context.T2;
-
-  return (
-    <div className={cn('display')}>
-      {hr}:{tenMin}
-      {oneMin}
-    </div>
-  );
-};
-
-const Update1Display = function Update1Display({ state }) {
-  const { oneMin, tenMin, hr } = state.context.T1;
-
-  return (
-    <div className={cn('display')}>
-      "update:"
-      {hr}:{tenMin}
-      {oneMin}
-    </div>
-  );
-};
-
-const Update2Display = function Update2Display({ state }) {
-  const { oneMin, tenMin, hr } = state.context.T2;
-
-  return (
-    <div className={cn('display')}>
-      "update:"
-      {hr}:{tenMin}
-      {oneMin}
-    </div>
-  );
-};
-
-const ChimeDisplay = function Alarm1Display({ state }) {
+const AlarmDisplay = function AlarmDisplay({ state, alarmNumber }) {
+  const { oneMin, tenMin, hr } = state.context[`T${alarmNumber}`];
   const states = {
-    disabled: 'alive.chime-status.disabled',
-    enabled: 'alive.chime-status.enabled',
+    '1min': `alive.main.displays.out.update-${alarmNumber}.1min`,
+    '10min': `alive.main.displays.out.update-${alarmNumber}.10min`,
+    hr: `alive.main.displays.out.update-${alarmNumber}.hr`,
+    on: `alive.main.displays.out.alarm-${alarmNumber}.on`,
+    off: `alive.main.displays.out.alarm-${alarmNumber}.off`,
   };
-
   const currentState = Object.keys(states).find((key) =>
     state.matches(states[key])
   );
+  const statusLabel = currentState === 'on' ? 'on' : 'of';
+  const classNames = Object.keys(states).reduce((result, el) => {
+    result[el] = el === currentState ? cn(null, 'blinking') : undefined;
+    return result;
+  }, {});
 
-  const displays = {
-    disabled: 'Chime OFF',
-    enabled: 'Chime ON',
+  return (
+    <LCD>
+      <Digits1>
+        <span className={classNames.hr}>{hr}</span>
+      </Digits1>
+      <Colon />
+      <Digits2>
+        <span className={classNames['10min']}>{tenMin}</span>
+        <span className={classNames['1min']}>{oneMin}</span>
+      </Digits2>
+      <Digits3>
+        <span className={classNames['on'] || classNames['off']}>
+          {statusLabel}
+        </span>
+      </Digits3>
+    </LCD>
+  );
+};
+
+const Alarm1Display = function Alarm1Display({ alarmNumber, ...props }) {
+  return <AlarmDisplay alarmNumber={1} {...props} />;
+};
+
+const Alarm2Display = function Alarm2Display({ alarmNumber, ...props }) {
+  return <AlarmDisplay alarmNumber={2} {...props} />;
+};
+
+const ChimeDisplay = function ChimeDisplay({ state }) {
+  const states = {
+    off: 'alive.main.displays.out.chime.off',
+    on: 'alive.main.displays.out.chime.on',
   };
+  const currentState = Object.keys(states).find((key) =>
+    state.matches(states[key])
+  );
+  const statusLabel = currentState === 'on' ? 'on' : 'of';
 
-  return displays[currentState] || 'Weird chime';
+  return (
+    <LCD>
+      <Colon />
+      <Digits2>00</Digits2>
+      <Digits3>
+        <span className={cn(null, 'blinking')}>{statusLabel}</span>
+      </Digits3>
+    </LCD>
+  );
 };
 
 const Regular = function Regular({ state }) {
@@ -202,9 +294,9 @@ const Out = function Out({ state }) {
 
   const displays = {
     alarm1: <Alarm1Display state={state} />,
-    update1: <Update1Display state={state} />,
+    update1: <Alarm1Display state={state} />,
     alarm2: <Alarm2Display state={state} />,
-    update2: <Update2Display state={state} />,
+    update2: <Alarm2Display state={state} />,
     chime: <ChimeDisplay state={state} />,
   };
 

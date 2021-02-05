@@ -88,14 +88,12 @@ const StopwatchStatus = function StopwatchStatus({ state, ...props }) {
 };
 
 const StatusIcons = function StatusIcons({ state }) {
-  const className = cn('status-icon');
-
   return (
     <>
-      <Alarm1Status state={state} className={className} />
-      <Alarm2Status state={state} className={className} />
-      <ChimeStatus state={state} className={className} />
-      <StopwatchStatus state={state} className={className} />
+      <Alarm1Status state={state} className={cn('alarm1-icon')} />
+      <Alarm2Status state={state} className={cn('alarm2-icon')} />
+      <ChimeStatus state={state} className={cn('chime-icon')} />
+      <StopwatchStatus state={state} className={cn('stopwatch-icon')} />
     </>
   );
 };
