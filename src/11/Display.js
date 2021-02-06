@@ -261,7 +261,8 @@ const AlarmDisplay = function AlarmDisplay({ state, alarmNumber }) {
   const currentState = Object.keys(states).find((key) =>
     state.matches(states[key])
   );
-  const statusLabel = currentState === 'on' ? 'on' : 'of';
+  const isEnabled = state.matches(`alive.alarm-${alarmNumber}-status.enabled`);
+  const statusLabel = isEnabled ? 'on' : 'of';
   const classNames = Object.keys(states).reduce((result, el) => {
     result[el] = el === currentState ? cn(null, 'blinking') : undefined;
     return result;
