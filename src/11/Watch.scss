@@ -13,7 +13,18 @@
     display: grid;
     grid-template-columns: [start] 57px [display-start] 206px [display-end] 57px [end];
     grid-template-rows: [start] 104px [display-start] 96px [display-end] 86px [end];
-    background: no-repeat url('assets/face.svg');
+  }
+
+  &__face-background {
+    &[data-state-light='on'] {
+      & #status-icons {
+        fill: #c0bdb5;
+      }
+
+      & #lcd {
+        fill: #dadad2;
+      }
+    }
   }
 
   &__displays {
@@ -42,11 +53,6 @@
   &__chime-icon,
   &__stopwatch-icon {
     grid-row: icons-start / icons-end;
-
-    &[data-state='blinking'],
-    &[data-state='onRunning'] {
-      animation: blink 0.6s infinite alternate;
-    }
   }
 
   &__alarm1-icon {
