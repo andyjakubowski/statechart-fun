@@ -13,7 +13,7 @@ import { ReactComponent as FaceBackground } from './assets/face.svg';
 export const WatchCase = function WatchCase() {
   const [state, send] = useMachine(watchCaseMachine);
   const watchRef = state?.children?.watch;
-  const watchEl = watchRef ? <Watch watchRef={watchRef} /> : null;
+  const watchEl = watchRef ? <Watch watchRef={watchRef} /> : <DeadWatch />;
 
   return (
     <div>
@@ -24,25 +24,35 @@ export const WatchCase = function WatchCase() {
   );
 };
 
+const DeadWatch = function DeadWatch() {
+  return <Face />;
+};
+
 const Watch = function Watch({ watchRef }) {
   const [state, send] = useActor(watchRef);
   useKeyDown(send);
   useKeyUp(send);
 
   return (
-    <div>
+    <>
       <MetaInfo state={state} />
       <BeepLabel state={state} />
       <Face state={state} />
-    </div>
+    </>
   );
 };
 
 const Face = function Face({ state }) {
-  const isAlive = state.matches('alive');
-  const lightState = state.value?.alive?.light;
-  const elStatusIcons = isAlive ? <StatusIcons state={state} /> : undefined;
-  const elDisplay = isAlive ? <Display state={state} /> : undefined;
+  const isAlive = !!state && state.matches('alive');
+  let lightState;
+  let elStatusIcons;
+  let elDisplay;
+  if (isAlive) {
+    lightState = state.value.alive.light;
+    elStatusIcons = <StatusIcons state={state} />;
+    elDisplay = <Display state={state} />;
+  }
+
   return (
     <div className={cn('face')}>
       <FaceBackground
