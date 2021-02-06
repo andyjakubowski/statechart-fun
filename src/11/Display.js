@@ -4,11 +4,22 @@ import colon from './assets/colon.svg';
 import period from './assets/period.svg';
 import prime from './assets/prime.svg';
 import doublePrime from './assets/double_prime.svg';
+import weakBattery from './assets/weak_battery.svg';
 import am from './assets/am.svg';
 import pm from './assets/pm.svg';
 
 const Colon = function Colon() {
   return <img className={cn('colon-icon')} src={colon} alt="Colon" />;
+};
+
+const WeakBattery = function WeakBattery() {
+  return (
+    <img
+      className={cn('weak-battery-icon')}
+      src={weakBattery}
+      alt="Weak battery"
+    />
+  );
 };
 
 const Primes = function Primes() {
@@ -48,8 +59,17 @@ const Digits3 = function Digits3({ children }) {
   return <div className={cn('digits3')}>{children}</div>;
 };
 
-const LCD = function LCD({ children }) {
-  return <div className={cn('display')}>{children}</div>;
+const LCD = function LCD({ state, children }) {
+  const weakBatteryState = 'alive.power.blink';
+  const isWeakBattery = state.matches(weakBatteryState);
+  const weakBatteryIndicator = isWeakBattery ? <WeakBattery /> : undefined;
+
+  return (
+    <div className={cn('display')}>
+      {weakBatteryIndicator}
+      {children}
+    </div>
+  );
 };
 
 const formatHr = function formatHr(mode, hr) {
@@ -86,7 +106,7 @@ const TimeDisplay = function TimeDisplay({ state }) {
   const PeriodIndicator = getPeriodIndicator(mode, hr);
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>{formattedHr}</Digits1>
       <Colon />
       <Digits2>
@@ -104,7 +124,7 @@ const DateDisplay = function DateDisplay({ state }) {
   const days = ['Mo', 'Tu', 'We', 'Th', 'fr', 'sa', 'su'];
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>{mon + 1}</Digits1>
       <Period />
       <Digits2>{date + 1}</Digits2>
@@ -123,7 +143,7 @@ const TimeUpdateDisplay = function TimeUpdateDisplay({ state, updateState }) {
   const PeriodIndicator = getPeriodIndicator(mode, hr);
   const formattedSec = String(sec).padStart(2, '0');
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>
         <span className={classNames.hr}>{formattedHr}</span>
       </Digits1>
@@ -148,7 +168,7 @@ const DateUpdateDisplay = function DateUpdateDisplay({ state, updateState }) {
     return result;
   }, {});
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>
         <span className={classNames.mon}>{mon + 1}</span>
       </Digits1>
@@ -167,7 +187,7 @@ const YearUpdateDisplay = function YearUpdateDisplay({ state, updateState }) {
   const firstTwoDigits = yearString.slice(0, 2);
   const lastTwoDigits = yearString.slice(2);
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits2>
         <span className={cn(null, 'blinking')}>{firstTwoDigits}</span>
       </Digits2>
@@ -182,7 +202,7 @@ const ModeUpdateDisplay = function ModeUpdateDisplay({ state, updateState }) {
   const modeDigits = mode === '12h' ? '12' : '24';
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>
         <span className={cn(null, 'blinking')}>{modeDigits}</span>
       </Digits1>
@@ -250,7 +270,7 @@ const AlarmDisplay = function AlarmDisplay({ state, alarmNumber }) {
   const PeriodIndicator = getPeriodIndicator(mode, hr);
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>
         <span className={classNames.hr}>{formattedHr}</span>
       </Digits1>
@@ -288,7 +308,7 @@ const ChimeDisplay = function ChimeDisplay({ state }) {
   const statusLabel = currentState === 'on' ? 'on' : 'of';
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Colon />
       <Digits2>00</Digits2>
       <Digits3>
@@ -373,7 +393,7 @@ const Stopwatch = function Stopwatch({ state }) {
   const hundrethsOfSecString = String(hundrethsOfSec).padStart(2, '0');
 
   return (
-    <LCD>
+    <LCD state={state}>
       <Digits1>{minString}</Digits1>
       <Primes />
       <Colon />

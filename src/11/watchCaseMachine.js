@@ -1,5 +1,5 @@
 import { createMachine, actions } from 'xstate';
-const { assign, send, pure } = actions;
+const { assign, send, pure, log } = actions;
 
 const seconds = function seconds(num) {
   return num * 1000;
@@ -235,6 +235,7 @@ const watchMachine = createMachine(
       },
       stopwatch: INITIAL_STOPWATCH_CONTEXT,
       TICK_INTERVAL: 1000,
+      batteryPercentage: 0.3,
     },
     states: {
       dead: {
@@ -969,6 +970,26 @@ const watchMachine = createMachine(
         on: {
           TICK: {
             actions: [
+              pure((ctx) => {
+                const newBatteryPercentage = ctx.batteryPercentage - 0.1;
+                const isWeakBattery = newBatteryPercentage < 10;
+                const isDeadBattery = newBatteryPercentage <= 0;
+                let actions = [];
+
+                if (isWeakBattery) {
+                  actions.push(send('BATTERY_WEAKENS'));
+                }
+
+                if (isDeadBattery) {
+                  actions.push(send('WEAK_BATTERY_DIES'));
+                } else {
+                  actions.push(
+                    assign({ batteryPercentage: newBatteryPercentage })
+                  );
+                }
+
+                return actions;
+              }),
               pure((ctx) => {
                 let actions = [];
 

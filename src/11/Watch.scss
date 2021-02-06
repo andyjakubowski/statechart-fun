@@ -3,6 +3,10 @@
   src: url('assets/DigitalDismay-VAKw.ttf');
 }
 
+:root {
+  --animation-blink: blink 0.6s infinite alternate;
+}
+
 .Watch {
   &__meta {
     font-size: 10px;
@@ -53,6 +57,10 @@
   &__chime-icon,
   &__stopwatch-icon {
     grid-row: icons-start / icons-end;
+
+    &[data-state='blinking'] {
+      animation: var(--animation-blink);
+    }
   }
 
   &__alarm1-icon {
@@ -77,8 +85,9 @@
 
     display: grid;
     grid-template-columns:
-      9px
-      [digits1-start] 63px [digits1-end
+      3px
+      [weak-battery-start] 6px [weak-battery-end
+      digits1-start] 63px [digits1-end
       prime-start colon-start period-start] 13px [prime-end colon-end period-end
       digits2-start] 63px [digits2-end
       double-prime-start] 5px [double-prime-end
@@ -87,9 +96,15 @@
     grid-template-rows:
       5px
       [primes-start] 4px
-      [digits1-start digits2-start am-start pm-start] 13px [primes-end am-end pm-end
+      [digits1-start digits2-start am-start pm-start weak-battery-start] 13px [primes-end am-end pm-end weak-battery-end
       colon-start period-start digits3-start] 32px [colon-end period-end digits1-end digits2-end digits3-end]
       6px;
+  }
+
+  &__weak-battery-icon {
+    grid-column: weak-battery-start / weak-battery-end;
+    grid-row: weak-battery-start / weak-battery-end;
+    animation: var(--animation-blink);
   }
 
   &__colon-icon {
@@ -158,7 +173,7 @@
   }
 
   &_blinking {
-    animation: blink 0.6s infinite alternate;
+    animation: var(--animation-blink);
   }
 }
 

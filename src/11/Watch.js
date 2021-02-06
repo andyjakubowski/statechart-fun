@@ -39,7 +39,10 @@ const Watch = function Watch({ watchRef }) {
 };
 
 const Face = function Face({ state }) {
-  const lightState = state.value.alive.light;
+  const isAlive = state.matches('alive');
+  const lightState = state.value?.alive?.light;
+  const elStatusIcons = isAlive ? <StatusIcons state={state} /> : undefined;
+  const elDisplay = isAlive ? <Display state={state} /> : undefined;
   return (
     <div className={cn('face')}>
       <FaceBackground
@@ -47,8 +50,8 @@ const Face = function Face({ state }) {
         className={cn('face-background')}
       />
       <div className={cn('displays')}>
-        <StatusIcons state={state} />
-        <Display state={state} />
+        {elStatusIcons}
+        {elDisplay}
       </div>
     </div>
   );
