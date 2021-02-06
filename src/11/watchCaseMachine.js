@@ -235,7 +235,7 @@ const watchMachine = createMachine(
       },
       stopwatch: INITIAL_STOPWATCH_CONTEXT,
       TICK_INTERVAL: 1000,
-      batteryPercentage: 0.3,
+      batteryPercentage: 100,
     },
     states: {
       dead: {
