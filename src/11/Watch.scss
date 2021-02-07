@@ -13,7 +13,84 @@
     background-color: hsla(0, 0%, 0%, 0.16);
   }
 
+  &__face-and-buttons {
+    display: grid;
+    grid-template-columns:
+      [a-button-start]
+      73px
+      [face-start]
+      361px
+      [a-button-end
+      b-button-start d-button-start]
+      15px
+      [c-button-start]
+      85px
+      [face-end b-button-end c-button-end d-button-end];
+    grid-template-rows:
+      [face-start]
+      54px
+      [a-button-start b-button-start]
+      110px
+      [c-button-start
+      a-button-end b-button-end]
+      123px
+      [c-button-end
+      d-button-start]
+      132px
+      [face-end d-button-end];
+  }
+
+  &__button-a,
+  &__button-b,
+  &__button-c,
+  &__button-d {
+    width: 85px;
+    height: 85px;
+    border: none;
+    border-radius: 42.5px;
+    background-color: transparent;
+
+    display: flex;
+    justify-content: center;
+
+    font-family: ff-providence-sans-web-pro, sans-serif;
+    font-size: 51px;
+    line-height: 92px;
+
+    cursor: pointer;
+
+    &:hover {
+      background-color: hsla(240, 3%, 70%, 0.1);
+    }
+
+    &:active {
+      background-color: hsla(240, 3%, 70%, 0.12);
+    }
+  }
+
+  &__button-a {
+    grid-column: a-button-start / a-button-end;
+    grid-row: a-button-start / a-button-end;
+  }
+
+  &__button-b {
+    grid-column: b-button-start / b-button-end;
+    grid-row: b-button-start / b-button-end;
+  }
+
+  &__button-c {
+    grid-column: c-button-start / c-button-end;
+    grid-row: c-button-start / c-button-end;
+  }
+
+  &__button-d {
+    grid-column: d-button-start / d-button-end;
+    grid-row: d-button-start / d-button-end;
+  }
+
   &__face {
+    grid-column: face-start / face-end;
+    grid-row: face-start / face-end;
     display: grid;
     grid-template-columns: [start] 83.01px [display-start] 206px [display-end] 96.99px [end];
     grid-template-rows: [start] 170.61px [display-start] 96px [display-end] 152.39px [end];
