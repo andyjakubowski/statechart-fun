@@ -35,7 +35,7 @@ const Watch = function Watch({ watchRef }) {
 
   return (
     <>
-      <MetaInfo state={state} />
+      {/* <MetaInfo state={state} /> */}
       <BeepLabel state={state} />
       <div className={cn('face-and-buttons')}>
         <Face state={state} />

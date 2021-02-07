@@ -13,6 +13,34 @@
     background-color: hsla(0, 0%, 0%, 0.16);
   }
 
+  &__beep-container {
+    display: grid;
+    grid-template-areas: 'the-one-area';
+    place-content: center;
+    place-items: center;
+    opacity: 0;
+
+    &[data-state-beep='beeping'] {
+      opacity: 1;
+      --animation-details: 0.5s infinite alternate;
+      --beep-text-animation: beep-text-zoom var(--animation-details);
+      --beep-lines-animation: beep-lines-fade var(--animation-details);
+    }
+  }
+
+  &__beep-text,
+  &__beep-lines {
+    grid-area: the-one-area;
+  }
+
+  &__beep-text {
+    animation: var(--beep-text-animation);
+  }
+
+  &__beep-lines {
+    animation: var(--beep-lines-animation);
+  }
+
   &__face-and-buttons {
     display: grid;
     grid-template-columns:
@@ -266,5 +294,30 @@
 
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes beep-text-zoom {
+  0% {
+    transform: scale(0.8) rotate(-1deg);
+  }
+
+  60%,
+  100% {
+    transform: scale(1) rotate(1deg);
+  }
+}
+
+@keyframes beep-lines-fade {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  29%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
