@@ -1,13 +1,11 @@
 import React from 'react';
 import cn from './classNames';
 
-const MetaInfo = function MetaInfo({ state }) {
+const StateInfo = function StateInfo({ state }) {
   return (
-    <div>
-      <div className={cn('meta')}>
-        {`Context:\n${JSON.stringify(state.context)}\n`}
-      </div>
-      <div className={cn('meta')}>
+    <div className={cn('state-info')}>
+      <div>{`Context:\n${JSON.stringify(state.context)}\n`}</div>
+      <div>
         Watch State:
         <br />
         {state.toStrings().map((string, i) => (
@@ -21,4 +19,4 @@ const MetaInfo = function MetaInfo({ state }) {
   );
 };
 
-export default MetaInfo;
+export default StateInfo;

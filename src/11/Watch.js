@@ -5,8 +5,10 @@ import { useKeyDown, useKeyUp } from './extras';
 import { watchCaseMachine } from './watchCaseMachine';
 import StatusIcons from './StatusIcons';
 import cn from './classNames';
-import MetaInfo from './MetaInfo';
+import StateInfo from './StateInfo';
 import BeepLabel from './BeepLabel';
+import BatteryButton from './BatteryButton';
+import WatchButton from './WatchButton';
 import Display from './Display';
 import { ReactComponent as FaceBackground } from './assets/face.svg';
 
@@ -16,16 +18,19 @@ export const WatchCase = function WatchCase() {
   const watchEl = watchRef ? <Watch watchRef={watchRef} /> : <DeadWatch />;
 
   return (
-    <div>
+    <div className={cn('container')}>
       {watchEl}
-      <button onClick={() => send('INSERT_BATTERY')}>Insert battery</button>
-      <button onClick={() => send('REMOVE_BATTERY')}>Remove battery</button>
+      <BatteryButton state={state} send={send} />
     </div>
   );
 };
 
 const DeadWatch = function DeadWatch() {
-  return <Face />;
+  return (
+    <div className={cn('face-and-buttons')}>
+      <Face />
+    </div>
+  );
 };
 
 const Watch = function Watch({ watchRef }) {
@@ -35,7 +40,7 @@ const Watch = function Watch({ watchRef }) {
 
   return (
     <>
-      {/* <MetaInfo state={state} /> */}
+      <StateInfo state={state} />
       <BeepLabel state={state} />
       <div className={cn('face-and-buttons')}>
         <Face state={state} />
@@ -55,29 +60,6 @@ const Watch = function Watch({ watchRef }) {
     </>
   );
 };
-
-const WatchButton = (function makeWatchButton() {
-  const types = ['a', 'b', 'c', 'd'];
-  const events = types.reduce((result, type) => {
-    result[type] = {
-      mouseDown: `${type.toUpperCase()}_PRESSED`,
-      mouseUp: `${type.toUpperCase()}_RELEASED`,
-    };
-    return result;
-  }, {});
-
-  return function WatchButton({ type, send, children: label }) {
-    return (
-      <button
-        onMouseDown={() => send(events[type].mouseDown)}
-        onMouseUp={() => send(events[type].mouseUp)}
-        className={cn(`button-${type}`)}
-      >
-        {label}
-      </button>
-    );
-  };
-})();
 
 const Face = function Face({ state }) {
   const isAlive = !!state && state.matches('alive');
