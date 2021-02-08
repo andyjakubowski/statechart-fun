@@ -10,6 +10,7 @@ import BeepLabel from './BeepLabel';
 import BatteryButton from './BatteryButton';
 import WatchButton from './WatchButton';
 import Display from './Display';
+import happyPiggy from './assets/happy_piggy.png';
 import { ReactComponent as FaceBackground } from './assets/face.svg';
 
 export const WatchCase = function WatchCase() {
@@ -21,6 +22,7 @@ export const WatchCase = function WatchCase() {
     <div className={cn('container')}>
       {watchEl}
       <BatteryButton state={state} send={send} />
+      <img className={cn('happy-piggy')} src={happyPiggy} alt="A happy piggy" />
     </div>
   );
 };
