@@ -29,14 +29,14 @@ const StateInfo = function StateInfo({ state }) {
   return (
     <div className={cn('state-info')}>
       <div className={cn('state-info-section')}>
-        <h3 className={cn('state-info-heading')}>Extended state</h3>
-        <div className={cn('state-info-context')}>{contextInfoElements}</div>
-      </div>
-      <div className={cn('state-info-section')}>
         <h3 className={cn('state-info-heading')}>Active states</h3>
         <div className={cn('state-info-states')}>
           {state.toStrings().join('\n')}
         </div>
+      </div>
+      <div className={cn('state-info-section')}>
+        <h3 className={cn('state-info-heading')}>Extended state</h3>
+        <div className={cn('state-info-context')}>{contextInfoElements}</div>
       </div>
     </div>
   );
