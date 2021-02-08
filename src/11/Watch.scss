@@ -40,7 +40,7 @@ button {
 
     box-sizing: border-box;
     min-height: var(--min-height_default);
-    padding: 32px;
+    padding: 0 32px;
     display: grid;
 
     grid-template-columns: var(--columns_default);
@@ -412,9 +412,9 @@ button {
   }
 
   &__happy-piggy {
-    width: 128px;
+    width: unquote('min(7vw, 128px)');
     grid-column: -3 / -1;
-    grid-row: -3 / -1;
+    grid-row: -4 / -1;
     place-self: end;
   }
 }
