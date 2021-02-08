@@ -15,40 +15,71 @@ button {
   font-family: var(--font-family);
 }
 
+p {
+  margin: 0;
+}
+
+a {
+  color: currentcolor;
+}
+
 .Watch {
   &__container {
-    --rows_x-small: 132px 275px auto auto;
+    --rows_x-small: auto 132px 275px auto auto;
     --min-height_x-small: initial;
     --row-gap_x-small: 24px;
 
     --columns_small: 100%;
-    --rows_small: 132px 419px auto auto;
-    --areas_small: 'beep' 'face-and-buttons' 'battery-button' 'state-info';
+    --rows_small: auto 132px 419px auto auto;
+    --areas_small: 'project-info' 'beep' 'face-and-buttons' 'battery-button'
+      'state-info' 'fig-31';
 
     --min-height_default: 100vh;
-    --columns_default: 1fr 480px 1fr 1fr;
-    --rows_default: 1fr 132px auto auto 1fr;
-    --areas_default: 'xxx state-info        ttt              ttt'
-      'xxx state-info beep             zzz'
-      'xxx state-info face-and-buttons zzz' 'xxx state-info battery-button   .'
-      'xxx state-info .                .';
-    --column-gap_default: 0;
-    --row-gap_default: 56px;
+    --columns_default: 480px min(72px, 3vw) 1fr;
+    --rows_default: auto 132px auto auto 1fr auto auto;
+    --areas_default: 'project-info project-info project-info project-info'
+      'state-info . beep .' 'state-info . face-and-buttons .'
+      'state-info . battery-button .' 'state-info . . . '
+      'fig-31 fig-31 fig-31 fig-31';
+    --row-gap_default: 24px;
 
-    --columns_large: 1fr 480px max-content 1fr;
-    --column-gap_large: 96px;
+    --rows_large: 132px auto auto 1fr auto auto;
+    --columns_large: 0.7fr 480px min(72px, 3vw) max-content 1fr;
+    --areas_large: '. state-info . beep .' '. state-info . face-and-buttons .'
+      '. state-info . battery-button .' '. state-info . . . '
+      'fig-31 fig-31 fig-31 fig-31 fig-31';
 
     box-sizing: border-box;
     min-height: var(--min-height_default);
-    padding: 0 32px;
+    padding: 32px;
     display: grid;
 
     grid-template-columns: var(--columns_default);
     grid-template-rows: var(--rows_default);
     grid-template-areas: var(--areas_default);
-    column-gap: var(--column-gap_default);
     row-gap: var(--row-gap_default);
     place-content: center;
+  }
+
+  &__project-info {
+    grid-area: project-info;
+
+    display: grid;
+    gap: 24px;
+    justify-items: center;
+  }
+
+  &__piggy-and-text {
+    display: grid;
+    justify-items: center;
+  }
+
+  &__description {
+    width: 300px;
+    text-align: center;
+    line-height: 1.4375;
+    display: grid;
+    gap: 16px;
   }
 
   &__state-info {
@@ -411,11 +442,13 @@ button {
     cursor: pointer;
   }
 
+  &__figure-31 {
+    width: 100%;
+    grid-area: fig-31;
+  }
+
   &__happy-piggy {
-    width: unquote('min(7vw, 128px)');
-    grid-column: -3 / -1;
-    grid-row: -4 / -1;
-    place-self: end;
+    width: 128px;
   }
 }
 
@@ -459,16 +492,31 @@ button {
   }
 }
 
-@media screen and (min-width: 71.25em) {
+@media screen and (min-width: 90em) {
   .Watch {
     &__container {
+      grid-template-rows: var(--rows_large);
       grid-template-columns: var(--columns_large);
-      column-gap: var(--column-gap_large);
+      grid-template-areas: var(--areas_large);
+    }
+
+    &__project-info {
+      width: 160px;
+      align-self: start;
+      justify-self: end;
+      grid-column: -3 / -1;
+      grid-row: 1 / span 3;
+      justify-items: end;
+    }
+
+    &__description {
+      width: unset;
+      text-align: right;
     }
   }
 }
 
-@media screen and (max-width: 63em) {
+@media screen and (max-width: 70em) {
   .Watch {
     &__container {
       grid-template-columns: var(--columns_small);
@@ -476,9 +524,9 @@ button {
       grid-template-areas: var(--areas_small);
     }
 
-    &__happy-piggy {
-      grid-column: auto;
-      grid-row: auto;
+    &__description {
+      width: 300px;
+      text-align: center;
     }
   }
 }

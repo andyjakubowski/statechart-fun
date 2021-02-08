@@ -6,11 +6,12 @@ import { watchCaseMachine } from './watchCaseMachine';
 import StatusIcons from './StatusIcons';
 import cn from './classNames';
 import StateInfo from './StateInfo';
+import ProjectInfo from './ProjectInfo';
 import BeepLabel from './BeepLabel';
 import BatteryButton from './BatteryButton';
 import WatchButton from './WatchButton';
 import Display from './Display';
-import happyPiggy from './assets/happy_piggy.png';
+import figure31 from './assets/figure_31.png';
 import { ReactComponent as FaceBackground } from './assets/face.svg';
 
 export const WatchCase = function WatchCase() {
@@ -20,9 +21,14 @@ export const WatchCase = function WatchCase() {
 
   return (
     <div className={cn('container')}>
+      <ProjectInfo />
       {watchEl}
       <BatteryButton state={state} send={send} />
-      <img className={cn('happy-piggy')} src={happyPiggy} alt="A happy piggy" />
+      <img
+        className={cn('figure-31')}
+        src={figure31}
+        alt="Figure 31 from Harel's statecharts paper"
+      />
     </div>
   );
 };
